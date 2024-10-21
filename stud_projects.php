@@ -338,9 +338,6 @@ $conn->close();
                     </form>
                 </div>
             </div>
-        <img src="assets/img/girlprofile.png" alt="" width="100px "/>
-        <h2 class="profile-name">Vaishali</h2>
-        <h2 class="profile-roll">21CS053</h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
