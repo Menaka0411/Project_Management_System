@@ -16,17 +16,19 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user_type = $_POST['user_type'];
-    
+    $user_type = $_POST['user_type']; // Get the user type from the form
+
     // Check if the user type is student or staff/mentor
     if ($user_type === 'student') {
         $identifier = $_POST['roll_number']; // For students, use roll_number
         $identifier_column = 'roll_number';
         $table_name = 'students';
+        $role = null; // No role for students
     } else {
         $identifier = $_POST['username']; // For staff/mentors, use username (email)
         $identifier_column = 'email';
         $table_name = 'staff';
+        $role = $user_type; // Set the role based on the user type
     }
 
     $password = $_POST['password'];
@@ -37,40 +39,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Prepare a SQL statement to retrieve the user record securely
+    // Check if the user already exists
     $stmt = $conn->prepare("SELECT * FROM $table_name WHERE $identifier_column = ?");
     $stmt->bind_param("s", $identifier);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        // Fetch user data
-        $user = $result->fetch_assoc();
+        echo "User already exists.";
+    } else {
+        // User does not exist, insert new user
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
 
-        // Verify the password
-        if (password_verify($password, $user['password'])) {
-            // Set session variables
-            $_SESSION['user_id'] = $user['id']; // Assuming 'id' is the primary key
-            $_SESSION['role'] = $user_type;
-            $_SESSION['user'] = $user;
-            $_SESSION['name'] = $user['name'] ?? $identifier; // Set the name or identifier
-            $_SESSION['roll_number'] = $user['roll_number'] ?? ''; // Only for students
+        // Prepare an insert statement
+        if ($table_name === 'students') {
+            $insert_stmt = $conn->prepare("INSERT INTO students (roll_number, password) VALUES (?, ?)");
+            $insert_stmt->bind_param("ss", $identifier, $hashed_password);
+        } else {
+            $insert_stmt = $conn->prepare("INSERT INTO staff (email, password, role) VALUES (?, ?, ?)");
+            // Bind the parameters including the role
+            $insert_stmt->bind_param("sss", $identifier, $hashed_password, $role);
+        }
 
-            // Redirect to the appropriate dashboard
-            if ($user_type === 'student') {
-                header("Location: stud_dash.php");
-            } else {
-                header("Location: staff_dash.php");
-            }
+        if ($insert_stmt->execute()) {
+            echo "User registered successfully.";
+            // Redirect to the sign-in page
+            header("Location: signin.php");
             exit();
         } else {
-            echo "Incorrect password.";
+            echo "Error registering user: " . $insert_stmt->error;
         }
-    } else {
-        echo "No user found with the given identifier.";
     }
 
-    // Close the statement and connection
+    // Close the statement
     $stmt->close();
 }
 

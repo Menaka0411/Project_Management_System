@@ -1,7 +1,6 @@
 <?php
 session_start();
 require 'db_connection.php';
-//require 'db.php'; // Ensure you have the correct database connection file
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $role = $_POST['role'];
@@ -21,15 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['username'] = $username; // Store username in session for later use
 
         // Query the staff table using username
-        if ($role === 'Mentor') {
-            $stmt = $conn->prepare("SELECT * FROM staff WHERE email = ? AND role = 'Mentor'");
-        } elseif (in_array($role, ['HOD', 'Principal', 'Admin'])) {
-            $stmt = $conn->prepare("SELECT * FROM staff WHERE email = ? AND role IN ('HOD', 'Principal', 'Admin')");
-        } else {
-            echo "Invalid role.";
-            exit();
-        }
-        $stmt->bind_param("s", $username);
+        $stmt = $conn->prepare("SELECT * FROM staff WHERE email = ? AND role = ?");
+        $stmt->bind_param("ss", $username, $role); // Bind both email and role
     }
 
     // Execute the query

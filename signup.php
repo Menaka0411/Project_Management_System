@@ -57,7 +57,7 @@
             <h2>Sign Up</h2>
             <form action="signup_action.php" method="POST">
                 <select id="role" name="user_type" onchange="updateFields()" required>
-                    <option value="0" disabled selected>Select</option>
+                    <option value="" disabled selected>Select</option>
                     <option value="student">Student</option>
                     <option value="mentor">Mentor</option>
                     <option value="staff">Staff</option>
@@ -69,13 +69,13 @@
                 <!-- Roll Number for Students -->
                 <div id="rollNumberField" style="display: none;">
                     <label for="roll_number">Roll Number:</label>
-                    <input type="text" id="roll_number" name="roll_number">
+                    <input type="text" id="roll_number" name="roll_number" required>
                 </div>
 
                 <!-- Username for other roles -->
                 <div id="usernameField">
                     <label for="username">Username:</label>
-                    <input type="text" id="username" name="username">
+                    <input type="text" id="username" name="username" required>
                 </div>
 
                 <label for="password">Password:</label>
@@ -91,13 +91,16 @@
             const role = document.getElementById('role').value;
             const rollNumberField = document.getElementById('rollNumberField');
             const usernameField = document.getElementById('usernameField');
+            const rollNumberInput = document.getElementById('roll_number');
 
             if (role === 'student') {
                 rollNumberField.style.display = 'block';
                 usernameField.style.display = 'none';
+                rollNumberInput.setAttribute('required', 'required'); // Set roll number as required
             } else {
                 rollNumberField.style.display = 'none';
                 usernameField.style.display = 'block';
+                rollNumberInput.removeAttribute('required'); // Remove required from roll number
             }
         }
     </script>

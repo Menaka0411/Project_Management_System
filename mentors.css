@@ -7,12 +7,7 @@ body {
 .wrapper {
     display: flex;
 }
-.sidebar {
-    background: #4b4276; /* Sidebar color */
-    color: white;
-    width: 200px;
-    padding: 20px;
-}
+
 .sidebar img {
     border-radius: 50%; /* Profile image rounded */
 }
@@ -22,9 +17,6 @@ body {
 .sidebar ul {
     list-style-type: none; /* Remove bullet points */
     padding: 0;
-}
-.sidebar ul li {
-    margin: 15px 0; /* Space between menu items */
 }
 .sidebar ul li a {
     color: white; /* Menu item color */

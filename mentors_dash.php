@@ -1,5 +1,65 @@
+<?php
+session_start();
 
+// Check if user is logged in and has the 'Staff' role
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Mentor') {
+    header("Location: signin.php");
+    exit();
+}
 
+// Retrieve user data from session
+$email = $_SESSION['email'] ?? 'N/A'; 
+$role = $_SESSION['role'] ?? 'N/A'; 
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; 
+
+// Handle profile picture upload logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
+    $user_id = $_SESSION['user_id']; 
+
+    // Directory where the profile images will be saved
+    $target_dir = "uploads/profile_pics/";
+    $imageFileType = strtolower(pathinfo($_FILES["profile_pic"]["name"], PATHINFO_EXTENSION));
+    $new_filename = uniqid() . "." . $imageFileType; 
+    $target_file = $target_dir . $new_filename;
+
+    // Check if the file is an actual image
+    $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
+    if ($check !== false) {
+        // Check file size (limit to 5MB)
+        if ($_FILES["profile_pic"]["size"] < 5000000) {
+            // Allow certain file formats
+            if (in_array($imageFileType, ["jpg", "jpeg", "png"])) {
+                if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
+                    // File successfully uploaded, save the path in the database
+
+                    include 'db_connection.php'; // Ensure proper connection to your database
+
+                    // Update user profile picture in the database
+                    $sql = "UPDATE staff SET profile_image = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("si", $target_file, $user_id);
+
+                    if ($stmt->execute()) {
+                        $_SESSION['profile_image'] = $target_file; 
+                        header("Location: mentors_dash.php"); 
+                        exit();
+                    } else {
+                        echo "Error updating record: " . $conn->error;
+                    }
+                } else {
+                    echo "Error uploading file.";
+                }
+            } else {
+                echo "Only JPG, JPEG, and PNG files are allowed.";
+            }
+        } else {
+            echo "File size exceeds the limit.";
+        }
+    } else {
+        echo "File is not an image.";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -139,7 +199,45 @@
         .mentor-details h2 {
             margin-bottom: 10px;
             color: #4e64bb;
-}
+        }
+
+        .circle {
+            position: relative;
+            display: flex; /* Flexbox to center the circle */
+            justify-content: center; /* Horizontally center the circle */
+            align-items: center; /* Vertically center the circle */
+            margin-top: 20px; /* Adjust to move the circle higher or lower */
+            cursor: pointer; /* Make the whole circle clickable */
+        }
+
+        .profile-pic {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+
+        .p-image {
+            position: absolute;
+            bottom: 5px; /* Move to the bottom of the circle */
+            right: 28%; /* Position to the right */
+            color: #666666;
+        }
+
+        .upload-button {
+            font-size: 1.2em;
+        }
+
+        .upload-button:hover {
+            transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+            color: #999;
+        }
+
+        .file-upload {
+            display: none; /* Hide the file input */
+        }
+
 
     </style>
 </head>
@@ -147,10 +245,18 @@
 
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px" />
-        <h2 class="profile-name"><?php echo isset($mentor_data['name']) ? htmlspecialchars($mentor_data['name']) : ''; ?></h2>
-        <h2 class="profile-roll"><?php echo isset($mentor_data['department']) ? htmlspecialchars($mentor_data['department']) : ''; ?></h2>
-        <ul>
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+            <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+            <div class="p-image">
+                <i class="fa fa-camera upload-button"></i>
+                <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                    <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                </form>
+            </div>
+        </div>
+        <h2 class="profile-email"><?php echo htmlspecialchars($email); ?></h2> <!-- Display email -->
+        <p class="profile-role"><?php echo htmlspecialchars($role); ?></p> <!-- Display role -->
+                <ul>
             <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
@@ -255,6 +361,11 @@
             });
         });
     });
+    document.querySelector('.dropdown-btn').addEventListener('click', function() {
+    var dropdownContent = this.nextElementSibling;
+    dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+});
+
 
     $(document).ready(function() {
         // Initialize the calendar
