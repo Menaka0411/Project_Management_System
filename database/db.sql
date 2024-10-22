@@ -109,6 +109,21 @@ CREATE TABLE projects (
     FOREIGN KEY (mentor_id) REFERENCES staff(id) ON DELETE CASCADE
 );
 
+CREATE TABLE student_projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    project_title VARCHAR(255) NOT NULL,
+    project_description TEXT NOT NULL,
+    submission_date DATE DEFAULT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    mentor_comments TEXT DEFAULT NULL,
+    files VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    team_name VARCHAR(100) NOT NULL,
+    team_members TEXT NOT NULL,
+    technology_stack VARCHAR(255) NOT NULL
+);
+
 
 
 CREATE TABLE student_project_marks (
@@ -132,15 +147,4 @@ CREATE TABLE IF NOT EXISTS attendance (
     attendance_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (roll_number) REFERENCES student_details(roll_number) ON DELETE CASCADE
-);
-
-CREATE TABLE student_projects (
-    id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each project
-    student_id INT NOT NULL,            -- ID of the student
-    project_title VARCHAR(255) NOT NULL, -- Title of the project
-    project_description TEXT NOT NULL,   -- Description of the project
-    submission_date DATE NOT NULL,       -- Date when the project is submitted
-    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending', -- Status of the project
-    mentor_comments TEXT,               -- Comments from the mentor
-    files VARCHAR(255)                   -- Path to the files (can be a URL or a directory path)
 );

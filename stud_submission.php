@@ -1,33 +1,19 @@
-<?php
-session_start();
-include'profile_pic.php';
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Student') {
-    header("Location: signin.php");
-    exit();
-}
-
-// Retrieve user data from session
-$roll_number = $_SESSION['roll_number'] ?? 'N/A'; // Default to 'N/A' if not set
-
-// Safely retrieve dashboard data
-$dashboard_data = $_SESSION['dashboard_data'] ?? null;
-
-?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="mentors.css">
+    <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
-
-    <!-- Include Summernote CSS and JS from CDN -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
+     <!-- Include Summernote CSS and JS from CDN -->
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.js"></script>
 
@@ -126,9 +112,6 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
         .main-content {
             margin-top: 100px;
         }
-        .profile-roll {
-    margin-top: 20px; /* Add some space between profile picture and roll number */
-}
     </style>
 </head>
 <body>
@@ -154,8 +137,8 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
-                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
+                    <a href="add_sub.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="list_sub.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
@@ -178,6 +161,7 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
         <hr>
     </div>
 </div>
+
 <section class="main-content">
     <div class="container">
         <form id="submissionForm" action="stud_submit.php" method="POST" enctype="multipart/form-data" onsubmit="submitForm(event)">
@@ -233,7 +217,18 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
         </form>
     </div>
 </section>
-
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+        
+        dropdownBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const dropdownContent = this.nextElementSibling;
+                dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+    });
+</script>
 <script>
     // Initialize Summernote on document ready
     $(document).ready(function() {
@@ -275,18 +270,6 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
     }
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const dropdownBtns = document.querySelectorAll('.dropdown-btn');
-        
-        dropdownBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const dropdownContent = this.nextElementSibling;
-                dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
-            });
-        });
-    });
-</script>
-<script>
 $(document).ready(function() {
     var readURL = function(input) {
         if (input.files && input.files[0]) {
@@ -309,6 +292,5 @@ $(document).ready(function() {
     });
 });
 </script>
-
 </body>
 </html>

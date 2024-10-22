@@ -4,10 +4,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Database connection settings
-$host = 'localhost'; 
-$db = 'teams_management'; 
-$user = 'root'; 
-$pass = ''; 
+$host = 'localhost'; // Database host
+//$db = 'project_management_db';
+$db = 'teams_management'; // Database name
+$user = 'root'; // Database username
+$pass = ''; // Database password
 
 $conn = new mysqli($host, $user, $pass, $db);
 
@@ -41,23 +42,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        echo "User already exists.";
-    } else {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        
-        // Insert user into the database
-        if ($user_type === 'student') {
-            $insert_stmt = $conn->prepare("INSERT INTO students (roll_number, password) VALUES (?, ?)");
-        } else {
-            $role = $_POST['role']; // Make sure to capture the role for staff
-            $insert_stmt = $conn->prepare("INSERT INTO staff (email, password, role) VALUES (?, ?, ?)");
-            $insert_stmt->bind_param("sss", $identifier, $hashed_password, $role);
-        }
-        
-        $insert_stmt->bind_param("ss", $identifier, $hashed_password);
+        // Fetch user data
+        $user = $result->fetch_assoc();
 
-        if ($insert_stmt->execute()) {
-            header("Location: signin.php"); // Redirect on success
+        // Verify the password
+        if (password_verify($password, $user['password'])) {
+            // Set session variables
+            $_SESSION['user_id'] = $user['id']; // Assuming 'id' is the primary key
+            $_SESSION['role'] = $user_type;
+            $_SESSION['user'] = $user;
+            $_SESSION['name'] = $user['name'] ?? $identifier; // Set the name or identifier
+            $_SESSION['roll_number'] = $user['roll_number'] ?? ''; // Only for students
+
+            // Redirect to the appropriate dashboard
+            if ($user_type === 'student') {
+                header("Location: stud_dash.php");
+            } else {
+                header("Location: staff_dash.php");
+            }
             exit();
         } else {
             echo "Error registering user: " . $conn->error;

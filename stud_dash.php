@@ -13,13 +13,15 @@ $roll_number = $_SESSION['roll_number'] ?? 'N/A'; // Default to 'N/A' if not set
 // Safely retrieve dashboard data
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 
+// Retrieve user profile image if exists
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
@@ -51,10 +53,35 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
             text-transform: uppercase;
             margin-left: 100px;
         }
-        .profile-roll {
-    margin-top: 20px; /* Add some space between profile picture and roll number */
+        .circle {
+    position: relative; /* Allow positioning of the camera icon relative to the profile picture */
+    display: inline-block; /* Ensure the circle is sized correctly */
 }
 
+.profile-pic {
+    width: 128px; /* Adjusted size */
+    height: 128px; /* Adjusted size */
+    border-radius: 50%; /* Makes it round */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* Optional border */
+    display: inline-block;
+    margin: 20px auto; /* Centering the profile picture */
+}
+
+.p-image {
+    position: absolute; /* Absolute positioning to overlap the profile image */
+    top: 80px; /* Adjust this value to position above the profile image */
+    right: 10px; /* Position slightly to the right */
+    color: #666666;
+    cursor: pointer; /* Change cursor on hover */
+}
+
+.upload-button {
+    font-size: 1.2em;
+}
+        .upload-button:hover {
+            transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -80,8 +107,8 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
-                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
+                    <a href="add_sub.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="list_sub.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
@@ -90,7 +117,7 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 
     <div class="main_header">
         <div class="header">
-            <h1>PROJECT MANAGEMENT</h1>
+            <h1>STUDENT DASHBOARD</h1>
             <div class="header_icons">
                 <div class="search">
                     <input type="text" placeholder="Search..." />

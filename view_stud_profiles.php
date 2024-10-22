@@ -357,8 +357,8 @@ if (isset($_POST['submit'])) {
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
                 <div class="dropdown-container">
-                    <a href="add_stud.php"><i class="fas fa-user-plus"></i> Add Students</a>
-                    <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="list_subission.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="projects.html"><i class="fas fa-address-card"></i>Projects</a></li>

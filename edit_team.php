@@ -38,14 +38,64 @@ if (isset($_GET['id'])) {
     <link rel="stylesheet" href="edit-style.css">
     <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
+    <style>
+    .profile-roll {
+    margin-top: 20px; /* Add some space between profile picture and roll number */
+}
+
+.circle {
+    position: relative;
+    display: flex; /* Flexbox to center the circle */
+    justify-content: center; /* Horizontally center the circle */
+    align-items: center; /* Vertically center the circle */
+    margin-top: 20px; /* Adjust to move the circle higher or lower */
+    cursor: pointer; /* Make the whole circle clickable */
+}
+
+.profile-pic {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: inline-block;
+}
+
+.p-image {
+    position: absolute;
+    bottom: 5px; /* Move to the bottom of the circle */
+    right: 28%; /* Position to the right */
+    color: #666666;
+}
+
+.upload-button {
+    font-size: 1.2em;
+}
+
+.upload-button:hover {
+    transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+    color: #999;
+}
+
+.file-upload {
+    display: none; /* Hide the file input */
+}
+
+    </style>
 </head>
 <body>
 
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px"/>
-        <h2 class="profile-name"><?php echo htmlspecialchars($user['name'] ?? 'Guest'); ?></h2> <!-- Default to 'Guest' if not set -->
-        <h2 class="profile-roll"><?php echo htmlspecialchars($user['roll_number'] ?? 'N/A'); ?></h2> <!-- Default to 'N/A' if not set -->
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+                <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+                <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                        <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                    </form>
+                </div>
+            </div>
+            <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
@@ -53,6 +103,7 @@ if (isset($_GET['id'])) {
             <li><a href="stud_mentors.php"><i class="fas fa-project-diagram"></i>Mentors</a></li>
             <li><a href="stud_submission.php"><i class="fas fa-blog"></i>Submission</a></li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
+        
         </ul>
     </div>
 
@@ -117,5 +168,28 @@ if (isset($_GET['id'])) {
 </div>
 </form>
 </a>
+<script>
+$(document).ready(function() {
+    var readURL = function(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('.profile-pic').attr('src', e.target.result);
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    $(".file-upload").on('change', function(){
+        readURL(this);
+    });
+
+    $(".upload-button").on('click', function() {
+       $(".file-upload").click();
+    });
+});
+</script>
 </body>
 </html>
