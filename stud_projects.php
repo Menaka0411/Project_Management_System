@@ -147,7 +147,7 @@ $conn->close();
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <title>Student project Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
@@ -288,41 +288,7 @@ $conn->close();
             margin-top: 20px; /* Add some space between profile picture and roll number */
         }
 
-        .circle {
-            position: relative;
-            display: flex; /* Flexbox to center the circle */
-            justify-content: center; /* Horizontally center the circle */
-            align-items: center; /* Vertically center the circle */
-            margin-top: 20px; /* Adjust to move the circle higher or lower */
-            cursor: pointer; /* Make the whole circle clickable */
-        }
-        .profile-pic {
-            width: 128px;
-            height: 128px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            display: inline-block;
-        }
-
-        .p-image {
-            position: absolute;
-            bottom: 5px; /* Move to the bottom of the circle */
-            right: 28%; /* Position to the right */
-            color: #666666;
-        }
-
-        .upload-button {
-            font-size: 1.2em;
-        }
-
-        .upload-button:hover {
-            transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
-            color: #999;
-        }
-
-        .file-upload {
-            display: none; /* Hide the file input */
-        }
+        
     </style>
 </head>
 <body>
@@ -338,6 +304,8 @@ $conn->close();
                     </form>
                 </div>
             </div>
+            <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
+
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
@@ -347,12 +315,11 @@ $conn->close();
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="add_sub.php"><i class="fas fa-user-plus"></i> Add Submission</a>
-                    <a href="list_sub.php"><i class="fas fa-list"></i> List Submission</a>
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
-            <li><a href="stud_editor.php"><i class="fas fa-address-book"></i>Editor</a></li>
         </ul>
     </div>
 
@@ -374,12 +341,9 @@ $conn->close();
 
 <section class="main-content">
         <div class="container">
-            <div class="header">
-                <h1>Your Project Dashboard</h1>
-            </div>
+        
 
             <div class="form-container" id="form-container">
-                <button id="create-project-btn">Create New Project</button>
                 <form action="stud_projects.php" method="POST">
                     <div class="form-row">
                         <div class="form-group">
@@ -387,7 +351,7 @@ $conn->close();
                             <input type="text" name="project_title" id="project_title" required />
                         </div>
                         <div class="form-group">
-                            <label for="project_description">Project Description:</label>
+                            <label for="project_description">Project Domain:</label>
                             <input type="text" name="project_description" id="project_description" required />
                         </div>
                     </div>
@@ -410,7 +374,7 @@ $conn->close();
                 <?php foreach ($projects as $project): ?>
                     <div class="project-box">
                         <h3><?php echo $project['project_title']; ?></h3>
-                        <p><strong>Description:</strong> <?php echo $project['project_description']; ?></p>
+                        <p><strong>Domain:</strong> <?php echo $project['project_description']; ?></p>
                         <p><strong>Submitted on:</strong> <?php echo $project['submission_date']; ?></p>
                         <p><strong>Status:</strong> <?php echo $project['status']; ?></p>
                         <div class="project-buttons">

@@ -84,6 +84,42 @@
   .sidebar .social_media a:hover {
     background: #4b4276;
   }
+  /*profile image*/
+.circle {
+  position: relative;
+  display: flex; /* Flexbox to center the circle */
+  justify-content: center; /* Horizontally center the circle */
+  align-items: center; /* Vertically center the circle */
+  margin-top: 20px; /* Adjust to move the circle higher or lower */
+  cursor: pointer; /* Make the whole circle clickable */
+}
+
+.profile-pic {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: inline-block;
+}
+
+.p-image {
+  position: absolute;
+  bottom: 5px; /* Move to the bottom of the circle */
+  right: 28%; /* Position to the right */
+  color: #666666;
+}
+
+.upload-button {
+  font-size: 1.2em;
+}
+.upload-button:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+  color: #999;
+}
+
+.file-upload {
+  display: none; /* Hide the file input */
+}
   
   .main_header {
     margin-left: 200px; /* Leave space for the sidebar */

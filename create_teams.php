@@ -1,5 +1,5 @@
 <?php
-include 'db.php';  // Include database connection
+include 'db_connection.php';  
 //inlcude 'db.php'; // Include database connection
 
 $messages = [];
@@ -86,7 +86,7 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Team Creation Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>

@@ -1,6 +1,6 @@
 
-CREATE DATABASE teams_management
-Use teams_management 
+--CREATE DATABASE teams_management
+--Use teams_management 
     
 CREATE TABLE teams (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,6 +50,7 @@ CREATE TABLE students (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     roll_number VARCHAR(20) NOT NULL UNIQUE, 
     password VARCHAR(255) NOT NULL, 
+    profile_image VARCHAR(255),
     login_time DATETIME
 );
 
@@ -58,6 +59,7 @@ CREATE TABLE staff (
     email VARCHAR(100) NOT NULL UNIQUE, 
     password VARCHAR(255) NOT NULL, 
     role ENUM('Mentor', 'HOD', 'Principal', 'AO') NOT NULL, 
+    profile_image VARCHAR(255),
     login_time DATETIME
 );
 --created
@@ -84,9 +86,6 @@ CREATE TABLE academic_marks (
     review_date DATE,
     FOREIGN KEY (student_id) REFERENCES student_details(student_id)
 );
-
-
-
 
 
 ALTER TABLE projects_submissions 
