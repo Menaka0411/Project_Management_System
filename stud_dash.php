@@ -1,19 +1,13 @@
 <?php
 session_start();
-include 'profile_pic.php';
+include 'includes/profile_pic.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Student') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
     header("Location: signin.php");
     exit();
 }
-
-// Retrieve user data from session
-$roll_number = $_SESSION['roll_number'] ?? 'N/A'; // Default to 'N/A' if not set
-
-// Safely retrieve dashboard data
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
-
-// Retrieve user profile image if exists
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 ?>
 
@@ -39,49 +33,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
             margin-top: 100px;
             margin-left: 100px;
         }
-        .abstract {
-            height: 200px;
-            width: 700px;
-            margin-left: 250px;
-        }
-        .abstract h2 {
-            text-align: justify;
-            font-size: 32px;
-            font-weight: 600;
-        }
-        .h2-tag {
-            text-transform: uppercase;
-            margin-left: 100px;
-        }
-        .circle {
-    position: relative; /* Allow positioning of the camera icon relative to the profile picture */
-    display: inline-block; /* Ensure the circle is sized correctly */
-}
-
-.profile-pic {
-    width: 128px; /* Adjusted size */
-    height: 128px; /* Adjusted size */
-    border-radius: 50%; /* Makes it round */
-    border: 2px solid rgba(255, 255, 255, 0.2); /* Optional border */
-    display: inline-block;
-    margin: 20px auto; /* Centering the profile picture */
-}
-
-.p-image {
-    position: absolute; /* Absolute positioning to overlap the profile image */
-    top: 80px; /* Adjust this value to position above the profile image */
-    right: 10px; /* Position slightly to the right */
-    color: #666666;
-    cursor: pointer; /* Change cursor on hover */
-}
-
-.upload-button {
-    font-size: 1.2em;
-}
-        .upload-button:hover {
-            transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
-            color: #999;
-        }
+    
     </style>
 </head>
 <body>
@@ -96,7 +48,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
                         <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
                     </form>
                 </div>
-            </div>
+            </div><br>
             <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
@@ -107,8 +59,8 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="add_sub.php"><i class="fas fa-user-plus"></i> Add Submission</a>
-                    <a href="list_sub.php"><i class="fas fa-list"></i> List Submission</a>
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
@@ -188,7 +140,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
 
 <script src="assets/js/calendar.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+     document.addEventListener("DOMContentLoaded", function () {
         const dropdownBtns = document.querySelectorAll('.dropdown-btn');
         
         dropdownBtns.forEach(btn => {
@@ -198,8 +150,6 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
             });
         });
     });
-</script>
-<script>
 $(document).ready(function() {
     var readURL = function(input) {
         if (input.files && input.files[0]) {

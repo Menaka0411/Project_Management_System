@@ -1,68 +1,11 @@
 <?php
 session_start();
-
-
-// Retrieve user data from session
-$roll_number = $_SESSION['roll_number'] ?? 'N/A'; // Default to 'N/A' if not set
-
-// Safely retrieve dashboard data
-$dashboard_data = $_SESSION['dashboard_data'] ?? null;
-
-// Retrieve user profile image if exists
-$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
-
-// Handle profile picture upload logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
-    $user_id = $_SESSION['user_id']; // Assuming you have the user's ID in the session
-
-    // Directory where the profile images will be saved
-    $target_dir = "uploads/profile_pics/";
-    $imageFileType = strtolower(pathinfo($_FILES["profile_pic"]["name"], PATHINFO_EXTENSION));
-    $new_filename = uniqid() . "." . $imageFileType; // Create a unique filename
-    $target_file = $target_dir . $new_filename;
-
-    // Check if the file is an actual image
-    $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
-    if ($check !== false) {
-        // Check file size (limit to 5MB)
-        if ($_FILES["profile_pic"]["size"] < 5000000) {
-            // Allow certain file formats
-            if (in_array($imageFileType, ["jpg", "jpeg", "png"])) {
-                if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
-                    // File successfully uploaded, save the path in the database
-
-                    include 'db_connection.php'; // Ensure proper connection to your database
-
-                    // Update user profile picture in the database
-                    $sql = "UPDATE students SET profile_image = ? WHERE id = ?";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("si", $target_file, $user_id);
-
-                    if ($stmt->execute()) {
-                        $_SESSION['profile_image'] = $target_file; // Update session with new image path
-                        header("Location: stud_dashboard.php"); // Redirect to dashboard after upload
-                        exit();
-                    } else {
-                        echo "Error updating record: " . $conn->error;
-                    }
-                } else {
-                    echo "Error uploading file.";
-                }
-            } else {
-                echo "Only JPG, JPEG, and PNG files are allowed.";
-            }
-        } else {
-            echo "File size exceeds the limit.";
-        }
-    } else {
-        echo "File is not an image.";
-    }
-}
-
-?>
-
-<?php
 include 'db_connection.php';  
+include 'includes/profile_pic.php';
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; // Default to 'N/A' if not set
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; 
+
 //inlcude 'db.php'; // Include database connection
 
 $messages = [];
@@ -149,364 +92,18 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Team Creation Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="mentors.css">
+    <link rel="stylesheet" href="assets/css/teams.css">
     <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
-    
-    <style>
-                body {
-        font-family: Arial, sans-serif;
-        background-color: whitesmoke; /* Light blue */
-        margin: 0;
-        padding: 0;
-        }
-        .abstract {
-            height: 200px;
-            width: 700px;
-            margin-left: 250px;
-        }
-        .abstract h2 {
-            text-align: justify;
-            font-size: 32px;
-            font-weight: 600;
-        }
-        .h2-tag {
-            text-transform: uppercase;
-            margin-left: 100px;
-        }
-
-
-        .container {
-
-        max-width: 100%;
-        margin-left:210px;
-        background-color: #FFFFFF; 
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Header Styles */
-        h1, h2, h3 {
-        color: #594f8d; 
-        }
-        .header>h1{
-            text-transform: uppercase;
-            font-size: 30px;
-        }
-
-        .form-container {
-            background-color: #f7f7f7; /* Light gray background */
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Slight shadow */
-            margin-bottom: 20px;
-        }
-
-        /* Form row styles */
-        .form-row {
-        display: flex; 
-        justify-content: space-between; 
-        margin-bottom: 1rem; 
-        }
-
-        .form-group {
-        flex: 1; 
-        margin-right: 10px; 
-        }
-        .form-group label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-            color: #594f8d; /* Label color matching the theme */
-        }
-
-        .form-group:last-child {
-        margin-right: 0; 
-        }
-
-        .hidden {
-        display: none;
-        }
-
-
-        /* Label styles */
-        label {
-        margin-bottom: 5px;
-        display: block;
-        }
-        h2{
-            padding: 10px;
-        }
-        #form-container input[type="text"],
-        #form-container input[type="number"],
-        #form-container select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            margin-top: 5px;
-            font-size: 14px;
-            background-color: #fff; /* White background for form inputs */
-        }
-        /* Input and select styles */
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="number"],
-        select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-sizing: border-box;
-        }
-
-        /* Button Styles */
-        button {
-        background-color: #594f8d;
-        margin:10px;
-        color: #FFFFFF; 
-        border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        }
-
-        button.edit-btn {
-        background-color: orange;
-        }
-
-        button.view-btn {
-        background-color: green;
-        }
-
-        button.delete-btn {
-        background-color: red;
-        }
-
-        /* Created Teams Section */
-        #created-teams {
-        display: flex;
-        justify-content: space-evenly; 
-       
-        padding: 20px;
-
-        }
-
-        .team-box {
-        background-color: white;
-        width: 400px; /* Two cards in a row */
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        margin:15px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
-        }
-
-        .team-box h3 {
-        font-size: 18px;
-        margin-bottom: 5px; /* Reduce space below heading */
-        }
-
-        .team-box h4 {
-        font-size: 18px;
-        margin-bottom: 5px; /* Reduce space below heading */
-        }
-
-        .team-box p {
-        margin: 2px 0; /* Tighten space between paragraphs */
-        line-height: 1.2; /* Reduce line spacing */
-        }
-
-        .team-box ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 5px 0; /* Reduce space before and after the list */
-        }
-
-        .team-box ul li {
-        margin: 3px 0; /* Tighten space between list items */
-        }
-        .team-members>li{
-            text-transform: capitalize;
-        }
-        #create-team-btn {
-            background-color: #5cb85c;
-            color: white;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #create-team-btn:hover {
-            background-color: #4cae4c;
-        }
-
-        /* Styling Error Messages */
-        .error-message {
-            color: red;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }   
-        /* Modal styles */
-        .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        }
-        
-        .main-content{
-            margin-top:100px;
-            margin-left: 100px;
-        }
-    
-        .modal-content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-        width: 80%;
-        max-width: 600px;
-        text-align: left;
-        position: relative; 
-        }
-
-        .close-modal {
-        position: absolute;
-        top: 8px; 
-        right: 8px; 
-        font-size: 25px;
-        cursor: pointer;
-        color: #333;
-        z-index: 1000; 
-        }
-
-        .close-modal:hover {
-        color: red; 
-        }
-        .team-box>h3{
-            font-size: 16px;
-            text-transform: uppercase;
-        }
-
-        /* Hidden modal by default */
-        .modal.hidden {
-        display: none;
-        }
-        @media screen and (max-width: 1200px) {
-    #created-teams {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-between;
-    }
-
-    .team-box {
-        width: 48%;
-    }
-}
-
-@media screen and (max-width: 992px) {
-    #created-teams {
-        justify-content: center;
-    }
-
-    .team-box {
-        width: 100%;
-        margin: 10px 0;
-    }
-}
-
-@media screen and (max-width: 768px) {
-    #created-teams {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .team-box {
-        width: 90%;
-        margin: 10px 0;
-    }
-}
-
-@media screen and (max-width: 576px) {
-    .container {
-        margin-left: 0;
-        padding: 10px;
-    }
-
-    .team-box {
-        width: 100%;
-        margin: 10px 0;
-    }
-
-    .form-row {
-        flex-direction: column;
-        margin-bottom: 1rem;
-    }
-
-    .form-group {
-        margin-right: 0;
-        margin-bottom: 10px;
-    }
-}.profile-roll {
-    margin-top: 20px; /* Add some space between profile picture and roll number */
-}
-
-.circle {
-    position: relative;
-    display: flex; /* Flexbox to center the circle */
-    justify-content: center; /* Horizontally center the circle */
-    align-items: center; /* Vertically center the circle */
-    margin-top: 20px; /* Adjust to move the circle higher or lower */
-    cursor: pointer; /* Make the whole circle clickable */
-}
-
-.profile-pic {
-    width: 128px;
-    height: 128px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    display: inline-block;
-}
-
-.p-image {
-    position: absolute;
-    bottom: 5px; /* Move to the bottom of the circle */
-    right: 28%; /* Position to the right */
-    color: #666666;
-}
-
-.upload-button {
-    font-size: 1.2em;
-}
-
-.upload-button:hover {
-    transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
-    color: #999;
-}
-
-.file-upload {
-    display: none; /* Hide the file input */
-}
-</style>
-</head>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
+    </head>
 <body>
 
 <div class="wrapper">
@@ -519,14 +116,21 @@ $conn->close();
                         <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
                     </form>
                 </div>
-            </div>
+            </div><br>
             <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
             <li><a href="stud_projects.php"><i class="fas fa-address-card"></i>Projects</a></li>
             <li><a href="stud_mentors.php"><i class="fas fa-project-diagram"></i>Mentors</a></li>
-            <li><a href="stud_submission.php"><i class="fas fa-blog"></i>Submission</a></li>
+
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
+                <div class="dropdown-container">
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
+                </div>
+            </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
         </ul>
     </div>
@@ -672,6 +276,16 @@ $conn->close();
 <script src="teams.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+     document.addEventListener("DOMContentLoaded", function () {
+        const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+        
+        dropdownBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const dropdownContent = this.nextElementSibling;
+                dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+    });
 $(document).ready(function() {
     var readURL = function(input) {
         if (input.files && input.files[0]) {

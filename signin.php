@@ -56,13 +56,10 @@
             <h2>Sign In</h2>
             <form action="signin_action.php" method="POST">
                 <label for="role">Role:</label>
-                <select id="role" name="role" onchange="updateFields()" required>
-                    <option value="0" disabled selected>Select</option>
-                    <option value="Student">Student</option>
-                    <option value="Mentor">Mentor</option>
-                    <option value="HOD">HOD</option>
-                    <option value="Principal">Principal</option>
-                    <option value="Admin">AO</option>
+                <select id="role" name="user_type" onchange="updateFields()" required>
+                    <option value="" disabled selected>Select</option>
+                    <option value="student">Student</option>
+                    <option value="staff">Staff</option>
                 </select>
 
                 <!-- Roll Number for Students -->
@@ -81,7 +78,6 @@
                 <input type="password" id="password" name="password" required>
 
                 <input type="hidden" id="login_time" name="login_time" value="">
-
                 <button type="submit" onclick="setLoginTime()">Sign In</button>
                 <p style="text-align: center; margin-top: 20px;">Don't have an account? <a href="signup.php">Sign Up</a></p>
                 </form>
@@ -90,17 +86,22 @@
 
     <script>
         function updateFields() {
-            const role = document.getElementById('role').value;
-            const rollNumberField = document.getElementById('rollNumberField');
-            const usernameField = document.getElementById('usernameField');
+    const role = document.getElementById('role').value;
+    const rollNumberField = document.getElementById('rollNumberField');
+    const usernameField = document.getElementById('usernameField');
+    const rollNumberInput = document.getElementById('roll_number');
+    const hiddenRole = document.getElementById('hiddenRole');
 
-            if (role === 'Student') {
-                rollNumberField.style.display = 'block';
-                usernameField.style.display = 'none';
-            } else {
-                rollNumberField.style.display = 'none';
-                usernameField.style.display = 'block';
-            }
+    if (role === 'student') {
+        rollNumberField.style.display = 'block';
+        usernameField.style.display = 'none';
+        rollNumberInput.setAttribute('required', 'required');
+    } else {
+        rollNumberField.style.display = 'none';
+        usernameField.style.display = 'block';
+        rollNumberInput.removeAttribute('required');
+    }
+
         }
         function setLoginTime() {
             const loginTimeInput = document.getElementById('login_time');

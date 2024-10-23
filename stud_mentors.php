@@ -1,8 +1,17 @@
+<?php
+session_start();
+include 'db_connection.php'; 
+include 'includes/profile_pic.php';
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+
+$messages = [];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <title>Student Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
@@ -26,9 +35,16 @@
 
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px "/>
-        <h2 class="profile-name">Vaishali</h2>
-        <h2 class="profile-roll">21CS053</h2>
+            <div class="circle" onclick="document.querySelector('.file-upload').click()">
+                <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+                <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                        <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                    </form>
+                </div>
+            </div><br>
+            <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
@@ -38,13 +54,12 @@
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="add_sub.php"><i class="fas fa-user-plus"></i> Add Submission</a>
-                    <a href="list_sub.php"><i class="fas fa-list"></i> List Submission</a>
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
         </ul>
-        
     </div>
 
     <div class="main_header">

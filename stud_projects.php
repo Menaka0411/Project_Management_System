@@ -1,5 +1,9 @@
 <?php
-include 'db_connection.php';  // Include database connection
+session_start();
+include 'db_connection.php'; 
+include 'includes/profile_pic.php';
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
 
 $messages = [];
 
@@ -83,7 +87,7 @@ $conn->close();
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <title>Student project Dashboard</title>
+    <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
@@ -92,7 +96,6 @@ $conn->close();
     <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -225,12 +228,18 @@ $conn->close();
     </style>
 </head>
 <body>
-
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px "/>
-        <h2 class="profile-name">Vaishali</h2>
-        <h2 class="profile-roll">21CS053</h2>
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+                <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+                <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                        <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                    </form>
+                </div>
+            </div><br>
+            <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
@@ -245,9 +254,9 @@ $conn->close();
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
-            <li><a href="stud_editor.php"><i class="fas fa-address-book"></i>Editor</a></li>
         </ul>
     </div>
+
     <div class="main_header">
         <div class="header">
             <h1>Project Dashboard</h1>

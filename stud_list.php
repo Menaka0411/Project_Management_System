@@ -1,15 +1,8 @@
 <?php
 session_start();
-
-// Database connection
 include 'db_connection.php'; 
-include 'profile_pic.php';
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Student') {
-    header("Location: signin.php");
-    exit();
-}
-
-$roll_number = $_SESSION['roll_number'] ?? 'N/A'; // Default to 'N/A' if not set
+include 'includes/profile_pic.php';
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 
 // Handle delete action
@@ -28,7 +21,6 @@ if (isset($_GET['delete_id'])) {
     }
 
     $stmt->close();
-    // Redirect to prevent resubmission of the form on page reload
     echo "<script>window.location.href = 'stud_list.php';</script>";
     exit;
 }
@@ -41,18 +33,16 @@ $result = $conn->query($sql);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <title>PMS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="mentors.css">
+    <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
-
-    <!-- Include Summernote CSS and JS from CDN -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.js"></script>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Include jQuery and Bootstrap JS -->
@@ -60,8 +50,6 @@ $result = $conn->query($sql);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-
-/* Table styles */
 /* Table styles */
 table {
     width: 80%; /* Set a width for the table */
@@ -125,15 +113,12 @@ tr:hover {
     text-decoration: none;
     border-color: #17a2b8 !important;
 }
-
-
     </style>
 </head>
 <body>
-
 <div class="wrapper">
     <div class="sidebar">
-            <div class="circle" onclick="document.querySelector('.file-upload').click()">
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
                 <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
                 <div class="p-image">
                     <i class="fa fa-camera upload-button"></i>
@@ -141,9 +126,8 @@ tr:hover {
                         <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
                     </form>
                 </div>
-            </div>
+            </div><br>
             <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
-
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
@@ -221,5 +205,19 @@ if ($result->num_rows > 0) {
 </table>
 
 <?php $conn->close(); ?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+
+    dropdownBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            this.classList.toggle("active");
+            const dropdownContent = this.nextElementSibling;
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+});
+
+    </script>
 </body>
 </html>

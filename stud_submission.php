@@ -1,3 +1,12 @@
+<?php
+session_start();
+include 'db_connection.php'; 
+include 'includes/profile_pic.php';
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+
+$messages = [];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,6 +118,12 @@
             font-size: medium;
             cursor: pointer;
         }
+        .p-image {
+            position: absolute;
+            bottom: -23px; /* Move to the bottom of the circle */
+            right: 25%; /* Position to the right */
+            color: #666666;
+        }
         .main-content {
             margin-top: 100px;
         }
@@ -126,7 +141,7 @@
                         <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
                     </form>
                 </div>
-            </div>
+            </div><br>
             <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
             <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
@@ -137,14 +152,14 @@
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="add_sub.php"><i class="fas fa-user-plus"></i> Add Submission</a>
-                    <a href="list_sub.php"><i class="fas fa-list"></i> List Submission</a>
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
             <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
-            <li><a href="stud_editor.php"><i class="fas fa-address-book"></i>Editor</a></li>
         </ul>
     </div>
+
 
     <div class="main_header">
         <div class="header">
@@ -233,7 +248,7 @@
     // Initialize Summernote on document ready
     $(document).ready(function() {
         $('#abstract').summernote({
-            height: 400,
+            height: 250,
             toolbar: [
                 ['style', ['bold', 'italic', 'underline', 'clear']],
                 ['font', ['strikethrough', 'superscript', 'subscript']],
