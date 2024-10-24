@@ -1,7 +1,6 @@
 <?php
 session_start();
 include 'includes/profile_pic.php';
-
 if (!isset($_SESSION['user_id']) || $_SESSION['username'] == 'staff') {
     header("Location: signin.php");
     exit();
@@ -131,16 +130,17 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
                 </a>
             </div>
             <div class="info">
-                <a href="viewprojects.html">
-                    <h2 class="info-heading">ALL Projects</h2>
+                <a href="allocate_mentor.php">
+                    <h2 class="info-heading">Allocating Mentors</h2>
                     <div class="info-details">
-                        <h3 class="info-numbers">1</h3> 
+                        <h3 class="info-numbers">Teams</h3> 
                     </div>
                 </a>
             </div>
         </div>
     </section>
 </section>
+<section class="allocate-mentor">
 
 
 <script>

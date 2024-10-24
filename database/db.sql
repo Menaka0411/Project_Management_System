@@ -9,6 +9,8 @@ CREATE TABLE teams (
     year INT NOT NULL,
     department VARCHAR(255) NOT NULL
 );
+ALTER TABLE teams ADD mentor_id INT;
+
 
 CREATE TABLE team_members (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,6 +55,12 @@ CREATE TABLE students (
     profile_image VARCHAR(255),
     login_time DATETIME
 );
+-- Add profile_image column to students table
+ALTER TABLE students ADD COLUMN profile_image VARCHAR(255);
+
+-- Add profile_image column to staff table
+ALTER TABLE staff ADD COLUMN profile_image VARCHAR(255);
+
 
 CREATE TABLE staff ( 
     id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -138,3 +146,55 @@ CREATE TABLE student_projects (
 
 
 
+CREATE TABLE student_project_marks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    roll_number VARCHAR(20),
+    semester INT,
+    year INT,
+    review_0 INT,
+    review_1 INT,
+    review_2 INT,
+    review_3 INT,
+    final_review INT
+);
+--attendance table
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    roll_number VARCHAR(20) NOT NULL,
+    week_number INT NOT NULL,
+    review_number INT NOT NULL,
+    status ENUM('Present', 'Absent') NOT NULL,
+    attendance_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (roll_number) REFERENCES student_details(roll_number) ON DELETE CASCADE
+);
+
+CREATE TABLE notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  team_id INT,
+  message TEXT,
+  is_read BOOLEAN DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE team_assignments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    team_id INT NOT NULL,
+    member_id INT NOT NULL,
+    assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    FOREIGN KEY (member_id) REFERENCES team_members(id) ON DELETE CASCADE
+);ALTER TABLE team_assignments
+ADD COLUMN team_name VARCHAR(255) NOT NULL; 
+
+CREATE TABLE allocated_mentors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    team_name VARCHAR(255) NOT NULL,
+    team_members TEXT NOT NULL,  -- List of members' names, comma-separated
+    department VARCHAR(255) NOT NULL,
+    team_size INT NOT NULL,
+    year INT NOT NULL,
+    leader_name VARCHAR(255) NOT NULL,  -- Team leader's name
+    mentor_name VARCHAR(255) NOT NULL,   -- Allocated mentor's name
+    action ENUM('allocated', 'not allocated') DEFAULT 'not allocated',  -- Allocation action
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
