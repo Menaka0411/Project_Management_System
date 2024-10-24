@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'includes/profile_pic.php';
+include 'db.php'; // Include the database connection file
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
     header("Location: signin.php");
@@ -9,7 +10,29 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 $roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
+
+// Function to get team notifications
+function getTeamNotifications($conn, $studentId) {
+    $notifications = [];
+    $sql = "SELECT team_name FROM team_assignments WHERE student_id = ?"; // Change this query according to your database structure
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $studentId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $notifications[] = $row['team_name'];
+    }
+
+    $stmt->close();
+    return $notifications;
+}
+
+// Call the function
+$studentId = $_SESSION['user_id']; // Assuming this holds the student ID
+$team_notifications = getTeamNotifications($conn, $studentId);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -34,6 +57,30 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
         .main-content {
             margin-top: 100px;
             margin-left: 100px;
+        }
+        #notificationPopup {
+            display: none;
+            position: absolute;
+            right: 20px;
+            top: 70px;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #notificationPopup ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        #notificationPopup li {
+            padding: 5px 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        #notificationPopup li:last-child {
+            border-bottom: none;
         }
     
     </style>
@@ -77,7 +124,19 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
                     <input type="text" placeholder="Search..." />
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
-                <i class="fa-solid fa-bell"></i>
+                <i class="fa-solid fa-bell" id="notificationButton"></i>
+                <div id="notificationPopup">
+                    <h3>Notifications</h3>
+                    <ul>
+                        <?php if (!empty($team_notifications)): ?>
+                            <?php foreach ($team_notifications as $team): ?>
+                                <li>You have been assigned to team: <?php echo htmlspecialchars($team); ?></li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li>No team assignments yet.</li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
             </div>
         </div>
         <br>
@@ -115,6 +174,19 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
             </div>
         </div>
     </section>
+    <section id="notifications">
+            <h2>Team Notifications</h2>
+            <ul>
+                <?php if (!empty($team_notifications)): ?>
+                    <?php foreach ($team_notifications as $team): ?>
+                        <li>You have been assigned to team: <?php echo htmlspecialchars($team); ?></li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li>No team assignments yet.</li>
+                <?php endif; ?>
+            </ul>
+    </section>
+
 
     <section id="calendar">
         <h2>Calendar <a href="cal.html">view</a></h2>
@@ -183,6 +255,28 @@ $(document).ready(function() {
     });
   });
 </script>
+<script>
+    // Pop-up notification toggle
+    document.getElementById('notificationButton').addEventListener('click', function() {
+        var popup = document.getElementById('notificationPopup');
+        popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    });
 
+    // Calendar setup
+    $(document).ready(function() {
+        $('#calendarBody').fullCalendar({
+            editable: true,
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            events: [],
+            dayClick: function(date) {
+                // Handle day click
+            }
+        });
+    });
+</script>
 </body>
 </html>

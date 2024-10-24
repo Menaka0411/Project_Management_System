@@ -1,10 +1,6 @@
 <?php
 session_start();
 include 'includes/profile_pic.php';
-if (!isset($_SESSION['user_id']) || $_SESSION['username'] == 'staff') {
-    header("Location: signin.php");
-    exit();
-}
 
 
 // Retrieve user data from session
@@ -17,6 +13,29 @@ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 // Retrieve user profile image if exists
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 ?>
+<?php
+include 'db.php'; // Include the database connection
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $team_id = $_POST['team_id'];
+    $mentor_id = $_POST['mentor_id'];
+
+    // Update the team to assign the mentor
+    $query = "UPDATE teams SET mentor_id = ? WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ii", $mentor_id, $team_id);
+
+    if ($stmt->execute()) {
+        echo "Mentor has been successfully allocated to the team!";
+    } else {
+        echo "Error allocating mentor: " . $stmt->error;
+    }
+
+    $stmt->close();
+    $conn->close();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -157,6 +176,87 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
             margin-bottom: 10px;
             color: #4e64bb;
         }
+        form div {
+    margin-bottom: 15px;
+}
+
+form label {
+    margin-right: 10px;
+}
+
+form select {
+    padding: 5px;
+}
+
+button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    border-left: 1px solid black;  /* Left border between columns */
+    border-right: 1px solid black;
+}
+
+table th {
+    background-color: #343a40; /* Dark background for header */
+    color: white; /* White text for header */
+    font-weight: bold; /* Bold font */
+}
+
+table tr:hover {
+    background-color: #f1f1f1; /* Light gray background on hover */
+}
+
+table td {
+    background-color: #ffffff; /* White background for table data */
+}
+
+table td form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#allocate{
+    margin-left: 20%;
+    margin-top: 10%;
+}
+button {
+    padding: 8px 12px;
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none; /* No border */
+    cursor: pointer; /* Pointer cursor on hover */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth background change */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+#allocation-result {
+    margin-top: 10px;
+    color: green; /* Green text for success messages */
+    font-weight: bold; /* Bold font for messages */
+}
+
+
     </style>
 </head>
 <body>
@@ -207,74 +307,57 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
     </div>
 </div>
 
-<section class="main-content">
-    <div class="mentor-details">
-        <h2>Mentor Details</h2>
-        <?php
-        // Display mentor details
-        if (!empty($mentor_data)) {
-            echo '<h3>Mentor ID: ' . htmlspecialchars($mentor_data['mentor_id']) . '</h3>';
-            echo '<p><strong>Name:</strong> ' . htmlspecialchars($mentor_data['name']) . '</p>';
-            echo '<p><strong>Role:</strong> ' . htmlspecialchars($mentor_data['role']) . '</p>';
-            echo '<p><strong>Department:</strong> ' . htmlspecialchars($mentor_data['department']) . '</p>';
-            // echo '<p><strong>Domain:</strong> ' . htmlspecialchars($mentor_data['domain']) . '</p>';
-            echo '<p><strong>Phone Number:</strong> ' . htmlspecialchars($mentor_data['phone_number']) . '</p>';
-            echo '<p><strong>Email:</strong> ' . htmlspecialchars($mentor_data['email']) . '</p>';
-        } else {
-            // Default user details when no mentor data is available
-            echo '<h3>Mentor ID: 1</h3>';
-            echo '<p><strong>Name:</strong> Vaishali</p>';
-            echo '<p><strong>Role:</strong> HOD</p>';
-            echo '<p><strong>Department:</strong> Computer Science Engineering</p>';
-            // echo '<p><strong>Domain:</strong></p>';
-            echo '<p><strong>Phone Number:</strong> +91 9632587014</p>';
-            echo '<p><strong>Email:</strong> vaishali@gmail.com</p>';
-        }
+<section id="allocate">
+    <h2>Allocate Mentors to Teams</h2>
+    <div class="container mx-auto mt-10">
         
-        ?>
-    </div>
-    
-    <section id="statistics">
-        <h2>Mentor Dashboard</h2>
-        <div class="content-items">
-            <div class="info">
-                <a href="cal.html">
-                    <h2 class="info-heading">Calendar</h2>
-                    <div class="info-details">
-                        <h3 class="info-numbers">3</h3>
-                    </div>
-                </a>
-            </div>
-            <div class="info">
-                <a href="viewteams.html">
-                    <h2 class="info-heading">View Teams</h2>
-                    <div class="info-details">
-                        <h3 class="info-numbers">3</h3>
-                    </div>
-                </a>
-            </div>
-            <div class="info">
-                <a href="Year.html">
-                    <h2 class="info-heading">Year</h2>
-                    <div class="info-details">
-                        <h3 class="info-numbers">2</h3> 
-                    </div>
-                </a>
-            </div>
-            <div class="info">
-                <a href="allocate_mentor.php">
-                    <h2 class="info-heading">Allocating Mentors</h2>
-                    <div class="info-details">
-                        <h3 class="info-numbers">Teams</h3> 
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-</section>
-<section class="allocate-mentor">
+        <table>
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Mentor</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+         
+                    <?php
+                        // Fetch teams from the database
+                        $teams_query = "SELECT id, team_name FROM teams";
+                        $teams_result = mysqli_query($conn, $teams_query);
 
+                        while ($team = mysqli_fetch_assoc($teams_result)) {
+                            $mentors_query = "SELECT id, email FROM staff WHERE role = 'Mentor'";
+                            $mentors_result = mysqli_query($conn, $mentors_query);
+                            echo "<tr>";
+                            echo "<td>{$team['team_name']}</td>";  // Team name
+                            echo "<td>";
+                            echo "<form method='POST' action='mentors_dash.php' class='inline'>";  // Form for each team
+                            echo "<select name='mentor_id' class='p-2 border border-gray-300 rounded-lg'>";
+                            while ($mentor = mysqli_fetch_assoc($mentors_result)) {
+                                echo "<option value='{$mentor['id']}'>{$mentor['email']}</option>";
+                            }
+                            echo "</select>";
+                            echo "<input type='hidden' name='team_id' value='{$team['id']}'>";
+                            echo "</td>";  // Closing the mentor select dropdown's <td>
+                            echo "<td>";  // New column for action button
+                            echo "<button type='submit'>Allocate</button>";  // Button in the action column
+                            echo "</form>";
+                            echo "</td>";
+                            echo "</tr>";
+                        }
+                    ?>
+                
+
+            </tbody>
+        </table>
+        <?php if (isset($allocation_message)): ?>
+            <div id="allocation-result"><?php echo $allocation_message; ?></div>
+        <?php endif; ?>
+    </div>
 </section>
+
+
 <!-- Modal for event details -->
 <!-- Add modal HTML if needed -->
 
@@ -295,60 +378,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
 });
 
 
-    $(document).ready(function() {
-        // Initialize the calendar
-        $('#calendar').fullCalendar({
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
-            },
-            editable: true, // Enable drag-and-drop
-            events: [
-                {
-                    title: 'Project Submission Deadline',
-                    start: '2024-10-10',
-                    backgroundColor: '#ff5733' // Custom color for deadlines
-                },
-                {
-                    title: 'Team Meeting',
-                    start: '2024-10-12T10:00:00',
-                    end: '2024-10-12T11:00:00', // Optional end date
-                    backgroundColor: '#007bff' // Another event color
-                },
-                {
-                    title: 'Client Review',
-                    start: '2024-10-15',
-                    allDay: true // For all-day events
-                },
-                {
-                    title: 'Weekly Team Sync',
-                    start: '2024-10-05T10:00:00',
-                    rrule: {
-                        freq: 'weekly',
-                        interval: 1,
-                        byweekday: ['mo', 'we', 'fr'] // Repeat every Monday, Wednesday, and Friday
-                    },
-                    backgroundColor: '#28a745' // Custom color for recurring events
-                }
-            ],
-            dayRender: function(date, cell) {
-                if (date.isSame(moment(), 'day')) {
-                    cell.css("background-color", "#ffcc00"); // Highlight today's date
-                }
-            },
-            eventClick: function(event) {
-                $('#modalTitle').text(event.title);
-                $('#modalDescription').text('Event Date: ' + event.start.format('MMMM Do YYYY'));
-                $('#eventModal').show(); // Show the modal
-            }
-        });
-
-        // Close modal functionality
-        $('#closeModal').click(function() {
-            $('#eventModal').hide(); // Hide the modal
-        });
-    });
+    
 </script>
 
 </body>
