@@ -1,15 +1,13 @@
 <?php
-// Database connection
-$servername = "localhost"; 
-$username = "root"; 
-$password = ""; 
-//$dbname = "project_management_db"; 
-$dbname = "teams_management"; 
+session_start();
+include 'db_connection.php';
+include 'includes/profile_pic.php';
+$username = $_SESSION['username'] ?? 'Vaishali'; 
+$role = $_SESSION['role'] ?? 'N/A';
+$mentor_data = $_SESSION['mentor_data'] ?? null;
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Fetch form data
@@ -60,22 +58,34 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Student</title>
+    <title>Mentors</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/addstud.css">
     <link rel="stylesheet" href="mentors.css">
-    <link rel="stylesheet" href="addstud.css">
     <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
 </head>
 <body>
 
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px" />
-        <h2 class="profile-name"><?php echo isset($mentor_data['name']) ? htmlspecialchars($mentor_data['name']) : ''; ?></h2>
-        <h2 class="profile-roll"><?php echo isset($mentor_data['department']) ? htmlspecialchars($mentor_data['department']) : ''; ?></h2>
-        <ul>
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+            <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+            <div class="p-image">
+                <i class="fa fa-camera upload-button"></i>
+                <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                    <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                </form>
+            </div>
+        </div><br>
+        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2> <!-- Display email -->
+        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p> <!-- Display role -->
+                <ul>
             <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
@@ -84,10 +94,10 @@ $conn->close();
                     <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
                 </div>
             </li>
-            <li><a href="projects.html"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="project_list.php"><i class="fas fa-address-card"></i>Projects</a></li>
             <li><a href="submission.html"><i class="fas fa-blog"></i>Submission</a></li>
             <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
-            <li><a href="cal.html"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
+            <li><a href="cal.php"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
         </ul>
     </div>
 
@@ -106,7 +116,7 @@ $conn->close();
         <hr>
     </div>
 </div>
-    <div class="main_header">
+    <div class="stud_main">
         <form method="POST" action="">
             <div class="container">
                 <!-- Student Details Section -->
@@ -129,6 +139,6 @@ $conn->close();
         </form>
     </div>
 
-    <script src="addstud.js"></script>
+    <script src="assets/js/addstud.js"></script>
 </body>
 </html>

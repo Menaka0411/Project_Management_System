@@ -33,6 +33,7 @@ $progress = $total_tasks > 0 ? ($completed_tasks / $total_tasks) * 100 : 0;
     <meta charset="UTF-8">
     <title>Project Progress</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="mentors.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">

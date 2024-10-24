@@ -105,17 +105,30 @@
     font-size: 16px;
     }
 
-    button.edit-btn {
-    background-color: orange;
+    .team-actions {
+        display: flex; /* Align buttons in a row */
     }
-
-    button.view-btn {
-    background-color: green;
+    
+    .team-actions button {
+        padding: 5px 10px; /* Adjust padding for smaller button height */
+        border: 2px solid #4b4276; /* Set border color */
+        border-radius: 5px; /* Rounded corners */
+        background-color: #FFFFFF; /* Default background color */
+        color: #4b4276; /* Default text color */
+        font-weight: bold; /* Bold text */
+        transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+        cursor: pointer; /* Change cursor on hover */
     }
-
-    button.delete-btn {
-    background-color: red;
+    
+    .team-actions button:last-child {
+        margin-right: 0; /* Remove margin from the last button */
     }
+    
+    .team-actions button:hover {
+        background-color: #4b4276; /* Background color on hover */
+        color: white; /* Text color on hover */
+    }
+    
 
     /* Created Teams Section */
     #created-teams {
@@ -168,7 +181,7 @@
         text-transform: capitalize;
     }
     #create-team-btn {
-        background-color: #5cb85c;
+        background-color: #4b4276;
         color: white;
         padding: 10px 20px;
         font-size: 16px;
@@ -177,7 +190,7 @@
         cursor: pointer;
     }
     #create-team-btn:hover {
-        background-color: #4cae4c;
+        background-color: #4b4276;
     }
 
     /* Styling Error Messages */

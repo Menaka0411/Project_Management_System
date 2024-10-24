@@ -1,8 +1,16 @@
+<?php
+session_start();
+include 'includes/profile_pic.php';
+$roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
+$student_id = $_SESSION['user_id']; 
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Side Navigation Bar</title>
+    <title>PMS Student Dashboard</title>
     <link rel="stylesheet" href="mentors.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -101,37 +109,44 @@
         }
         
         .main-content{
-            margin-top:100px;
+            margin-top:60px;
         }
     
     </style>
 </head>
 <body>
-
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px "/>
-        <h2 class="profile-name">Menu</h2>
-        <h2 class="profile-roll">cse</h2>
+            <div class="circle" onclick="document.querySelector('.file-upload').click()">
+                <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+                <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                        <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                    </form>
+                </div>
+            </div><br>
+            <h2 class="profile-roll"><?php echo htmlspecialchars($roll_number); ?></h2>
         <ul>
-            <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="stud_dash.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="stud_profiles.php"><i class="fas fa-user"></i>Profile</a></li>
+            <li><a href="stud_projects.php"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="stud_mentors.php"><i class="fas fa-project-diagram"></i>Mentors</a></li>
+
             <li class="dropdown">
-                <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
+                <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Submission</a>
                 <div class="dropdown-container">
-                    <a href="add_stud.php"><i class="fas fa-user-plus"></i> Add Students</a>
-                    <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
+                    <a href="stud_submission.php"><i class="fas fa-user-plus"></i> Add Submission</a>
+                    <a href="stud_list.php"><i class="fas fa-list"></i> List Submission</a>
                 </div>
             </li>
-            <li><a href="projects.html"><i class="fas fa-address-card"></i>Projects</a></li>
-            <li><a href="submission.html"><i class="fas fa-blog"></i>Submission</a></li>
-            <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
-            <li><a href="cal.html"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
+            <li><a href="create_teams.php"><i class="fas fa-address-book"></i>Teams</a></li>
         </ul>
     </div>
 
     <div class="main_header">
         <div class="header">
-            <h1>PROJECT MANAGEMENT</h1>
+            <h1>SCHEDULE EVENTS</h1>
             <div class="header_icons">
                 <div class="search">
                     <input type="text" placeholder="Search..." />

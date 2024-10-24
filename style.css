@@ -4,15 +4,7 @@ body {
     margin: 0;
     padding: 20px;
     background-color: light-gray;
-   
 }
-
-
-
-/* Container for the entire layout */
-
-/* Profile Section */
-
 
 /* Teams Section */
 .teams-section {
@@ -65,30 +57,27 @@ h2 {
 
 /* Members Container */
 
-
-/* Member Details */
-/* Container for the team members */
 .flex-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px; /* Adds spacing between each member */
+    gap: 20px; 
     justify-content: space-between;
     margin-top: 10px;
     
 }
 
 .abstract-section{
-               border:2px solid black;
+    border:2px solid black;
 }
+
 /* Each member's details */
 .member-details {
-    flex: 2 2 200px; /* Flex-grow: allows items to grow, Flex-shrink: allows shrinking, Flex-basis: sets initial size */
+    flex: 2 2 200px; 
     border: 2px solid black;
     padding: 10px;
     background-color: #f9f9f9;
     text-align: left;
 }
-
 
 .member-details h3 {
     margin-top: 0;
@@ -101,13 +90,13 @@ h2 {
 }
 @media (max-width: 1024px) {
     .member-details {
-        flex: 1 1 calc(50% - 20px); /* Two members per row */
+        flex: 1 1 calc(50% - 20px); 
     }
 }
 
 @media (max-width: 768px) {
     .member-details {
-        flex: 1 1 100%; /* One member per row */
+        flex: 1 1 100%; 
     }
 }
 

@@ -1,5 +1,6 @@
 <?php
 session_start();
+include'db_connection.php';
 include 'includes/profile_pic.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
@@ -9,6 +10,22 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 $roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
+
+$student_id = $_SESSION['user_id']; 
+
+// Prepare the SQL statement
+$sql = "SELECT COUNT(*) as total_projects FROM student_projects WHERE student_id = '$student_id'";
+$result = $conn->query($sql);
+
+// Check for SQL errors
+if (!$result) {
+    die("Database query failed: " . $conn->error);
+}
+
+$row = $result->fetch_assoc();
+
+// Check if row is not null
+$total_projects = $row['total_projects'] ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +107,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
             <div class="info">
                 <h2 class="info-heading">Total Projects</h2>
                 <div class="info-details">
-                    <h3 class="info-numbers"><?php echo $dashboard_data['total_projects'] ?? '0'; ?></h3>
+                    <h3 class="info-numbers"><?php echo htmlspecialchars($total_projects); ?></h3>
                 </div>
             </div>
             <div class="info">
@@ -115,7 +132,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
     </section>
 
     <section id="calendar">
-        <h2>Calendar <a href="cal.html">view</a></h2>
+        <h2>Calendar <a href="calender.php">view</a></h2>
         <div class="calendar-container">
             <div class="calendar-header">
                 <button id="prevYear" onclick="changeYear(-1)">&#10094;&#10094;</button>

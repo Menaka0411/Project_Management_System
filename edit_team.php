@@ -113,9 +113,7 @@ if (isset($_GET['id'])) {
     
         <div class="button-group">
             <button type="submit">Update Team</button>
-            <a href="index.php">
-                <button class="back">Go Back</button>
-            </a>
+            <button class="back" onclick="window.location.href='create_teams.php'">Go Back</button>
         </div>
 
         </form>
@@ -145,6 +143,9 @@ if (isset($_GET['id'])) {
     </div>
 </div>
 <script>
+    function goBack() {
+    window.history.back(); 
+}
 $(document).ready(function() {
     var readURL = function(input) {
         if (input.files && input.files[0]) {

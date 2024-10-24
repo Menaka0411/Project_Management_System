@@ -31,7 +31,7 @@ if (isset($_POST['team_id'], $_POST['team_name'], $_POST['team_size'], $_POST['y
         }
         
         // Redirect to index or success page
-        header("Location: stud_dash.php");
+        header("Location: create_teams.php");
         exit();
     } else {
         echo "Error updating team: " . $conn->error;

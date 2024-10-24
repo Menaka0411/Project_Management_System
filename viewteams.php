@@ -1,11 +1,25 @@
+<?php
+session_start();
+include 'db_connection.php';
+include 'includes/profile_pic.php';
+
+ $username = $_SESSION['username'] ?? 'Vaishali'; 
+ $role = $_SESSION['role'] ?? 'N/A';
+ $mentor_data = $_SESSION['mentor_data'] ?? null;
+ $dashboard_data = $_SESSION['dashboard_data'] ?? null;
+ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
+ 
+ ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
-    <title>View Teams</title>
+    <title>PMS Mentor Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/viewteams.css">
     <link rel="stylesheet" href="mentors.css">
     <script src="https://kit.fontawesome.com/0f4e2bc10d.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
@@ -13,171 +27,23 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
-    <style>
-        /* General layout for the page */
-
-        body {
-            font-family: 'Josefin Sans', sans-serif;
-            background-color: #f8f9fa;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar styling */
-        .wrapper {
-            display: flex;
-        }
-
-
-        .sidebar img {
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-
-        .sidebar h2 {
-            color: #fff;
-            font-size: 18px;
-            text-align: center;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .sidebar ul li {
-            margin: 15px 0;
-        }
-
-        .sidebar ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-        }
-
-        .sidebar ul li a i {
-            margin-right: 10px;
-        }
-        
-        .main_header {
-            flex: 1; /* Take remaining space */
-            padding: 20px;
-            background: white; /* Header background */
-        }
-        /* Main content layout */
-        .main-content {
-            padding: 20px;
-            margin-left: 250px;
-            margin-top: 100px;
-            width: 100%;
-            background-color: #f8f9fa;
-        }
-
-        .main-content h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        /* Filter and search */
-        .filter-options {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .filter-options select,
-        .filter-options input {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin-right: 10px;
-        }
-
-        /* Team cards layout */
-        .section-team {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-
-        .team-card {
-            width: 250px;
-            margin: 15px;
-            padding: 20px;
-            background-color: #fff;
-            border: 2px solid #343a40;
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        .team-card:hover {
-            transform: scale(1.05);
-        }
-
-        .team-card h3 {
-            margin-bottom: 10px;
-            color: #343a40;
-        }
-
-        .team-card p {
-            margin-bottom: 8px;
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .action-buttons button {
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .approve {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .approve:hover {
-            background-color: #218838;
-        }
-
-        .disapprove {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .disapprove:hover {
-            background-color: #c82333;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-            }
-
-            .team-card {
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 
 <body>
-
-    <!-- Sidebar section -->
+<div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px" />
-        <h2 class="profile-name"><?php echo isset($mentor_data['name']) ? htmlspecialchars($mentor_data['name']) : ''; ?></h2>
-        <h2 class="profile-roll"><?php echo isset($mentor_data['department']) ? htmlspecialchars($mentor_data['department']) : ''; ?></h2>
-        <ul>
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+            <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+            <div class="p-image">
+                <i class="fa fa-camera upload-button"></i>
+                <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                    <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                </form>
+            </div>
+        </div><br>
+        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2> <!-- Display email -->
+        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p> <!-- Display role -->
+                <ul>
             <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
@@ -186,10 +52,10 @@
                     <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
                 </div>
             </li>
-            <li><a href="projects.html"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="project_list.php"><i class="fas fa-address-card"></i>Projects</a></li>
             <li><a href="submission.html"><i class="fas fa-blog"></i>Submission</a></li>
             <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
-            <li><a href="cal.html"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
+            <li><a href="cal.php"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
         </ul>
     </div>
     <div class="main_header">

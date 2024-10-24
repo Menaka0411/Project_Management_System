@@ -8,9 +8,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $team_name = $_POST['team'];
     $status = $_POST['status'];
     $leader = $_POST['leader'];
-    $members = $_POST['members']; // Comma-separated string
-    $mentor_email = $_POST['mentor_id']; // Assuming you are passing the email as mentor_id
-    $abstract = $_POST['abstract'];
+    $members = $_POST['members']; 
+    $mentor_email = $_POST['mentor_id']; 
+    $abstract = strip_tags($_POST['abstract']);
 
     // Initialize mentor ID variable
     $mentor_id = null;
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         // Fetch the mentor ID
         $row = $result->fetch_assoc();
-        $mentor_id = $row['id']; // Set mentor_id to the valid ID from the staff table
+        $mentor_id = $row['id']; 
         $mentor_id_valid = true;
     }
 
@@ -62,27 +62,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // Prepare and bind the insert statement
         $stmt = $conn->prepare("INSERT INTO projects (title, team_name, status, leader, members, mentor, mentor_id, abstract, ppt_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("ssssssiss", $title, $team_name, $status, $leader, $members, $mentor_email, $mentor_id, $abstract, $ppt_path); // Adjusted to "ssssssiss"
 
-        // Execute the statement
         if ($stmt->execute()) {
-            // Return success JSON response
             echo json_encode(['status' => 'success', 'message' => 'Submission successful!']);
         } else {
-            // Return error JSON response
             echo json_encode(['status' => 'error', 'message' => $stmt->error]);
         }
 
-        // Close the statement
         $stmt->close();
     } else {
-        // Return error JSON response for invalid mentor ID
         echo json_encode(['status' => 'error', 'message' => 'Invalid mentor ID!']);
     }
 }
 
-// Close the database connection
 $conn->close();
 ?>

@@ -2,6 +2,7 @@
 session_start();
 include 'db_connection.php'; 
 include 'includes/profile_pic.php';
+
 $roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 
@@ -15,11 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($data['project_title']) || empty($data['project_description'])) {
         $messages[] = "Project title and description are required.";
     } else {
-        $student_id = 1; // Replace with actual student ID based on your application's logic
+        $student_id = $_SESSION['user_id']; // Use the logged-in student's ID
         $project_title = $conn->real_escape_string($data['project_title']);
         $project_description = $conn->real_escape_string($data['project_description']);
         $submission_date = date('Y-m-d'); // Set to today's date or use an input field
-        $status = 'Pending'; // Default status; you can change this as needed
+        $status = 'Pending'; // Default status
         $mentor_comments = ''; // Initial value
         $files = ''; // Initial value; handle file uploads if necessary
 
@@ -28,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 VALUES ('$student_id', '$project_title', '$project_description', '$submission_date', '$status', '$mentor_comments', '$files')";
 
         if ($conn->query($sql) === TRUE) {
-            // Success message
             $messages[] = "Project '$project_title' created successfully!";
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
@@ -38,8 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch all projects
-$sql = "SELECT * FROM student_projects";
+// Fetch projects for the logged-in student
+$student_id = $_SESSION['user_id']; // Ensure this is defined
+$sql = "SELECT * FROM student_projects WHERE student_id = '$student_id'";
 $result = $conn->query($sql);
 $projects = [];
 
@@ -82,6 +83,7 @@ if (isset($_POST['update_project'])) {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -220,11 +222,52 @@ $conn->close();
             margin-bottom: 10px;
         }   
 
-        .project-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px; /* Space above buttons */
-        }
+.project-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.project-buttons a {
+    padding: 5px 10px; /* Adjust padding for a better button feel */
+    text-decoration: none; 
+    border-radius: 5px;
+    border: 2px solid #4b4276; /* Set the border color to #4b4276 by default */
+    color: #4b4276; /* Text color */
+    font-weight: bold; 
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
+}
+
+.edit-button {
+    background-color: #FFFFFF; /* Background for Edit button */
+}
+
+.view-button {
+    background-color: #FFFFFF; /* Background for View button */
+}
+
+.delete-button {
+    background-color: #FFFFFF; /* Background for Delete button */
+}
+
+.project-buttons a:hover {
+    opacity: 0.8; /* Slightly transparent on hover */
+}
+
+.edit-button:hover {
+    background-color: #4b4276; /* Background color on hover */
+    color: white; /* Text color on hover */
+}
+
+.view-button:hover {
+    background-color: #4b4276; /* Background color on hover */
+    color: white; /* Text color on hover */
+}
+
+.delete-button:hover {
+    background-color: #4b4276; /* Background color on hover */
+    color: white; /* Text color on hover */
+}
+
     </style>
 </head>
 <body>
@@ -313,7 +356,7 @@ $conn->close();
                         <h3><?php echo $project['project_title']; ?></h3>
                         <p><strong>Domain:</strong> <?php echo $project['project_description']; ?></p>
                         <p><strong>Submitted on:</strong> <?php echo $project['submission_date']; ?></p>
-                        <p><strong>Status:</strong> <?php echo $project['status']; ?></p>
+                        <p><strong>Status:</strong> <?php echo $project['status']; ?></p><br>
                         <div class="project-buttons">
                             <a href="edit_projects.php?edit_id=<?php echo $project['id']; ?>" class="edit-button">Edit</a>
                             <a href="view_projects.php?view_id=<?php echo $project['id']; ?>" class="view-button">View</a>

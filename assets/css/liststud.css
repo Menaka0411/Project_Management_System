@@ -1,0 +1,126 @@
+        /* Style for the main container */
+        .main_header {
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        /* Table styles */
+            
+        table {
+            width: 70%; /* Set table width to 75% */
+            border-collapse: collapse;
+            margin: 20px auto; /* Center the table */
+            margin-left: 8%; /* Move the table slightly to the right */
+            font-size: 1em;
+            min-width: 600px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+/* Other styles remain unchanged */
+        .list-section{
+            background-color: #f4f8f4;
+            border:2px solid #e5e5e5;
+            margin-left: 10%;
+            
+
+        }
+
+        .table-container {
+            display: flex; /* Use flexbox for layout */
+            justify-content: center; /* Center the content horizontally */
+             
+            /* Move the table slightly to the right */
+        }
+
+
+        table thead tr {
+            background-color: #4b4276;
+            color: #ffffff;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        table tbody tr:hover {
+            background-color: #f3f3f3;
+        }
+
+        table tbody tr:last-of-type {
+            border-bottom: 2px solid #4b4276;
+        }
+
+        /* Profile link styling */
+        table td a {
+            text-decoration: none;
+            color: #4b4276;
+            font-weight: bold;
+        }
+
+        table td a:hover {
+            color: #4b4276;
+            text-decoration: underline;
+        }
+
+        .table-name,.table-course,.table-batch-year {
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+        }
+
+        /* Filter and search styles */
+        .filter-container {
+            text-align: right;
+            margin-top: 8%;
+            margin-right: 15%;
+            margin-bottom: 10px;
+        }
+
+        .filter-container select, .filter-container input {
+            padding: 10px;
+            margin: 0 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        /* Additional styles for search box */
+        .search-container {
+            position: relative;
+            display: inline-block; /* Align it with the select box */
+        }
+
+        .search-container input {
+            padding: 10px 30px 10px 40px; /* Add padding to prevent text overlap with icon */
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 80%; /* Position the icon */
+            top: 50%;
+            transform: translateY(-50%); /* Center the icon vertically */
+            color: #999; /* Icon color */
+            pointer-events: none; /* Make sure clicks go through the icon */
+        }
+        .action-dropdown {
+            padding: 10px 15px;  /* Increase the padding for a bigger appearance */
+            font-size: 1em;      /* Adjust font size as needed */
+            border-radius: 5px;  /* Maintain rounded corners */
+            border: 1px solid #ddd; /* Consistent border */
+            width: 120px;        /* Set width as needed */
+            cursor: pointer;     /* Show pointer cursor on hover */
+        }

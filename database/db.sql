@@ -76,15 +76,27 @@ CREATE TABLE IF NOT EXISTS student_details (
     phno VARCHAR(15) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TABLE academic_marks (
-    mark_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT NOT NULL,
-    semester INT NOT NULL,
-    review_type VARCHAR(50) NOT NULL,
-    marks DECIMAL(5,2),
-    review_date DATE,
-    FOREIGN KEY (student_id) REFERENCES student_details(student_id)
+CREATE TABLE student_project_marks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    roll_number VARCHAR(20),
+    semester INT,
+    year INT,
+    review_0 INT,
+    review_1 INT,
+    review_2 INT,
+    review_3 INT,
+    final_review INT
+);
+--attendance table
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    roll_number VARCHAR(20) NOT NULL,
+    week_number INT NOT NULL,
+    review_number INT NOT NULL,
+    status ENUM('Present', 'Absent') NOT NULL,
+    attendance_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (roll_number) REFERENCES student_details(roll_number) ON DELETE CASCADE
 );
 
 
@@ -126,25 +138,3 @@ CREATE TABLE student_projects (
 
 
 
-CREATE TABLE student_project_marks (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    roll_number VARCHAR(20),
-    semester INT,
-    year INT,
-    review_0 INT,
-    review_1 INT,
-    review_2 INT,
-    review_3 INT,
-    final_review INT
-);
---attendance table
-CREATE TABLE IF NOT EXISTS attendance (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    roll_number VARCHAR(20) NOT NULL,
-    week_number INT NOT NULL,
-    review_number INT NOT NULL,
-    status ENUM('Present', 'Absent') NOT NULL,
-    attendance_date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (roll_number) REFERENCES student_details(roll_number) ON DELETE CASCADE
-);
