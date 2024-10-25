@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$email || !$project_id) {
         echo "<script>alert('Email and Project ID are required.');</script>";
     } else {
-        // Prepare statement to get staff_id from email
+        
         $stmt = $conn->prepare("SELECT id FROM staff WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $staffRow = $staffResult->fetch_assoc();
     $staff_id = $staffRow['id'];
 
-    // Check if the project ID exists in the projects table
+    
     $checkProject = $conn->prepare("SELECT id FROM projects WHERE id = ?");
     $checkProject->bind_param("i", $project_id);
     $checkProject->execute();
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die('Invalid project ID.');
     }
 
-    // Insert into remarks table using staff_id
+   
     $insertQuery = $conn->prepare("INSERT INTO remarks (project_id, staff_email, content) VALUES (?, ?, ?)");
     $insertQuery->bind_param("iss", $project_id, $email, $remark);
 
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkProject->close();
 }
 
-// Do not close the connection yet, as we still need it to fetch remarks
+
 ?>
 
 <!DOCTYPE html>
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .right-top {
         width: 50%;
-        padding-left: 20px; /* Add some space between columns */
+        padding-left: 20px; 
     }
 
     .bottom-section {
@@ -119,13 +119,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .right-bottom {
         width: 50%;
-        text-align: right; /* Align remarks button to the right */
+        text-align: right; 
     }
 
     .team-member {
         display: flex;
         align-items: center;
-        margin-bottom: 10px; /* Space between team members */
+        margin-bottom: 10px; 
     }
 
     .team-member img {
@@ -154,22 +154,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         padding: 10px;
         border: 1px solid #ddd;
         background-color: #f9f9f9;
-        width: calc(100% - 30px); /* Same width as project-details */
-        margin-left: auto; /* Centering */
-        margin-right: auto; /* Centering */
+        width: calc(100% - 30px); 
+        margin-left: auto;
+        margin-right: auto; 
     }
 
     .team-members-container {
         display: flex;
         flex-wrap: wrap;
         margin-top: 10px;
-        width: calc(100% - 30px); /* Same width as project-details */
+        width: calc(100% - 30px); 
     }
 
     .team-member-icon {
         display: flex;
         align-items: center;
-        margin-right: 15px; /* Space between icons */
+        margin-right: 15px;
     }
 
     .team-member-icon img {
@@ -184,15 +184,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         color: #2c3e50;
     }
 
-    /* New styles for font size and spacing */
     .project-details h2 {
-        font-size: 1.5em; /* Increase the size of the title */
-        margin-bottom: 10px; /* Space below the title */
+        font-size: 1.5em; 
+        margin-bottom: 10px;
     }
 
     .project-details p {
-        font-size: 1.1em; /* Slightly larger font for paragraphs */
-        margin: 5px 0; /* Space above and below each paragraph */
+        font-size: 1.1em; 
+        margin: 5px 0; 
     }
     </style>
 </head>
@@ -262,25 +261,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="left-bottom">
         <div class="team-members-container">
             <?php
-            // Assuming you have a function to get team members by team name
-            $members = explode(',', $row['members']); // Assuming members are stored as a comma-separated string
-            $team_leader = $row['team_leader']; // Assuming you have the team leader's name from the database
             
-            // Counter to track the display of the leader vs. members
+            $members = explode(',', $row['members']); 
+            $team_leader = $row['team_leader'];
             $isLeaderDisplayed = false;
             
-            // Loop through the members and display them
             foreach ($members as $member) {
                 echo '<div class="team-member-icon">';
-                echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Member Image">'; // Placeholder for member's image
+                echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Member Image">'; 
                 echo '<span>' . htmlspecialchars(trim($member)) . '</span>';
                 echo '</div>';
             }
             
-            // Display the team leader
             echo '<div class="team-member-icon">';
-            echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Leader Image">'; // Placeholder for leader's image
-            echo '<span>' . htmlspecialchars(trim($team_leader)) . ' (Leader)</span>'; // Display leader with indication
+            echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Leader Image">'; 
+            echo '<span>' . htmlspecialchars(trim($team_leader)) . ' (Leader)</span>'; 
             echo '</div>';
             ?>
         </div>
@@ -298,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button class="remarks-button" onclick="toggleRemarks(<?php echo $row['id']; ?>)">View Remarks</button>
                         <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
                             <?php
-                            // Fetch remarks related to the current project
+                            
                             $remarksQuery = $conn->prepare("SELECT content FROM remarks WHERE project_id = ?");
                             $remarksQuery->bind_param("i", $row['id']);
                             $remarksQuery->execute();
@@ -333,6 +328,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </html>
 
 <?php
-// Close the database connection after all operations are completed
 $conn->close();
 ?>

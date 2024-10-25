@@ -90,7 +90,7 @@ $conn->close();
 
         .right-top {
             width: 50%;
-            padding-left: 20px; /* Add some space between columns */
+            padding-left: 20px; 
         }
 
         .bottom-section {
@@ -105,13 +105,13 @@ $conn->close();
 
         .right-bottom {
             width: 50%;
-            text-align: right; /* Align remarks button to the right */
+            text-align: right; 
         }
 
         .team-member {
             display: flex;
             align-items: center;
-            margin-bottom: 10px; /* Space between team members */
+            margin-bottom: 10px; 
         }
 
         .team-member img {
@@ -140,11 +140,11 @@ $conn->close();
             padding: 10px;
             border: 1px solid #ddd;
             background-color: #f9f9f9;
-            display: none; /* Initially hidden */
+            display: none; 
         }
 
         .remarks-input {
-            display: none; /* Initially hidden */
+            display: none; 
             margin-top: 10px;
         }
 
@@ -161,13 +161,13 @@ $conn->close();
             display: flex;
             flex-wrap: wrap;
             margin-top: 10px;
-            width: calc(100% - 30px); /* Same width as project-details */
+            width: calc(100% - 30px); 
         }
 
         .team-member-icon {
             display: flex;
             align-items: center;
-            margin-right: 15px; /* Space between icons */
+            margin-right: 15px;
         }
 
         .team-member-icon img {
@@ -182,15 +182,14 @@ $conn->close();
             color: #2c3e50;
         }
 
-        /* New styles for font size and spacing */
         .project-details h2 {
-            font-size: 1.5em; /* Increase the size of the title */
-            margin-bottom: 10px; /* Space below the title */
+            font-size: 1.5em; 
+            margin-bottom: 10px; 
         }
 
         .project-details p {
-            font-size: 1.1em; /* Slightly larger font for paragraphs */
-            margin: 5px 0; /* Space above and below each paragraph */
+            font-size: 1.1em; 
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -262,16 +261,14 @@ $conn->close();
                     <div class="left-bottom">
                         <div class="team-members-container">
                             <?php
-                            // Assuming you have a function to get team members by team name
-                            $members = explode(',', $row['members']); // Assuming members are stored as a comma-separated string
-                            $team_leader = $row['team_leader']; // Assuming you have the team leader's name from the database
-                            
-                            // Counter to track the display of the leader
+                           
+                            $members = explode(',', $row['members']); 
+                            $team_leader = $row['team_leader']; 
                             $isLeaderDisplayed = false;
 
                             foreach ($members as $member):
-                                // Fetch user image from your database if necessary
-                                $memberImage = 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image for members
+                               
+                                $memberImage = 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; 
                                 ?>
                                 <div class="team-member">
                                     <div class="team-member-icon">
