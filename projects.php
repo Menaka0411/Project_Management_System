@@ -1,8 +1,46 @@
+<?php 
+session_start();
+include 'db_connection.php';
+include 'includes/profile_pic.php';
+$username = $_SESSION['username'] ?? 'Vaishali'; 
+$role = $_SESSION['role'] ?? 'N/A';
+$mentor_data = $_SESSION['mentor_data'] ?? null;
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg';
+
+$sql = "SELECT * FROM student_projects ORDER BY submission_date DESC";
+$result = mysqli_query($conn, $sql);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['project_id'])) {
+    $project_id = $_POST['project_id'];
+    $mentor_comments = $_POST['mentor_comments'];
+    $action_status = $_POST['action_status'];
+
+    // Update query to save mentor comments and action status in the database
+    $update_sql = "UPDATE student_projects SET mentor_comments = ?, status = ? WHERE id = ?";
+    $stmt = $conn->prepare($update_sql);
+    $stmt->bind_param("ssi", $mentor_comments, $action_status, $project_id);
+    $stmt->execute();
+    $stmt->close();
+
+    $insert_sql = "INSERT INTO mentor_actions (project_id, mentor_comments, action_status) VALUES (?, ?, ?)";
+    $stmt_insert = $conn->prepare($insert_sql);
+    $stmt_insert->bind_param("iss", $project_id, $mentor_comments, $action_status);
+    $stmt_insert->execute();
+    $stmt_insert->close();
+}
+
+
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Projects Dashboard</title>
+    <title>PMS Mentor Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/projects.css">
@@ -15,54 +53,12 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
     <style>
-        body {
-            font-family: 'Josefin Sans', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4; /* Overall background color */
-        }
-        .wrapper {
-            display: flex;
-        }
-        .sidebar {
-            background: #4b4276; /* Sidebar color */
-            color: white;
-            width: 200px;
-            padding: 20px;
-        }
-
-        .sidebar img {
-            border-radius: 50%; /* Profile image rounded */
-        }
-        .sidebar h2 {
-            font-size: 20px; /* Profile name font size */
-        }
-        .sidebar ul {
-            list-style-type: none; /* Remove bullet points */
-            padding: 0;
-        }
-        .sidebar ul li {
-            margin: 15px 0; /* Space between menu items */
-        }
-        .sidebar ul li a {
-            color: white; /* Menu item color */
-            text-decoration: none; /* Remove underline */
-        }
-        .main_header {
-            flex: 1; /* Take remaining space */
-            padding: 20px;
-            background: white; /* Header background */
-        }
-        .main-content {
-            padding: 20px;
+       .main-content {
+            padding: 35px;
+            margin-left: 2%;
             flex: 1; /* Take remaining space */
         }
-        #statistics{
-            margin-left: 70px;
-        }
-        #statistics > h2{
-            margin-left: 150px;
-        }
+       
         .main-content>h2{
             margin-left: 200px;
             padding: 10px 20px;
@@ -75,72 +71,40 @@
             font-weight: 400;
 
         }
-        #calendar {
-            max-width: 800px;  /* Adjust width as necessary */
-            margin: 20px auto;  /* Center align */
-            padding: 20px;  /* Padding around the calendar */
-            border: 1px solid #ccc;  /* Light border for calendar */
-            border-radius: 10px;  /* Rounded corners */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
-            background-color: #f9f9f9;  /* Light background color */
-        }
-        .fc-today {
-            background-color: #ffcc00 !important; /* Highlight today */
-        }
-        .main-content{
-            margin-top:100px;
-        }
-        .fc-event {
-            border-radius: 5px; /* Rounded corners for events */
-            color: white; /* Text color for events */
-            border: none; /* Remove borders */
-        }
-        .fc-header-toolbar {
-            background-color: #f1f1f1; /* Header background */
-            padding: 10px 0; /* Header padding */
-            border-bottom: 1px solid #ccc; /* Bottom border */
-        }
-        /* Modal Styles */
-        #eventModal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
+        .project-table {
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 20px;
-        }
-        #modalContent {
-            background: #333;
-            border-radius: 5px;
-            padding: 20px;
-            max-width: 300px;
-            margin: auto;
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .mentor-details {
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            margin-left: 200px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .mentor-info p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 10px 0;
+        .project-table th, .project-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-        .mentor-details h2 {
-            margin-bottom: 10px;
+        .project-table th {
+            background-color: #4e64bb;
+            color: white;
+            text-align: center;
+        }
+        .project-table td a {
             color: #4e64bb;
-}
+            text-decoration: none;
+        }
+        .project-table td a:hover {
+            text-decoration: underline;
+        }
+        .project-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .project-table tr:hover {
+            background-color: #f1f1f1;
+        }
+         
+        .mentor-comments {
+            width: 100%;
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -149,13 +113,19 @@
 
 <div class="wrapper">
     <div class="sidebar">
-        <img src="assets/img/girlprofile.png" alt="" width="100px" />
-        <h2 class="profile-name"><?php echo isset($mentor_data['name']) ? htmlspecialchars($mentor_data['name']) : ''; ?></h2>
-        <h2 class="profile-roll"><?php echo isset($mentor_data['department']) ? htmlspecialchars($mentor_data['department']) : ''; ?></h2>
-        <ul>
+    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+            <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
+            <div class="p-image">
+                <i class="fa fa-camera upload-button"></i>
+                <form id="uploadForm" enctype="multipart/form-data" action="stud_dash.php" method="POST">
+                    <input class="file-upload" name="profile_pic" type="file" accept="image/*" onchange="document.getElementById('uploadForm').submit();" />
+                </form>
+            </div>
+        </div><br>
+        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2> <!-- Display email -->
+        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p> <!-- Display role -->
+                <ul>
             <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
-        
-            <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
                 <div class="dropdown-container">
@@ -163,14 +133,17 @@
                     <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
                 </div>
             </li>
-            <li><a href="teams.html"><i class="fas fa-address-book"></i>Projects</a></li>
-            <li><a href="cal.html"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
+            <li><a href="projects.php"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="receive.php"><i class="fas fa-blog"></i>Submission</a></li>
+            <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
+            <li><a href="cal.php"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
         </ul>
     </div>
 
+
     <div class="main_header">
         <div class="header">
-            <h1>PROJECT MANAGEMENT</h1>
+            <h1>STUDENT PROJECTS</h1>
             <div class="header_icons">
                 <div class="search">
                     <input type="text" placeholder="Search..." />
@@ -186,17 +159,58 @@
 </div>
 <section class="main-content">
     <div class="container">
-        <h1>Mentor Dashboard</h1><div id="notification" class="notification"></div>
-        <div class="cards-container" id="teamsCards"></div>
+        <h1>Mentor Dashboard - Student Projects</h1>
+        <table class="project-table">
+            <thead>
+                <tr>
+                    <th>Project Title</th>
+                    <th>Description</th>
+                    <th>Team</th>
+                    <th>Submission Date</th>
+                    <th>Mentor Comments</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (mysqli_num_rows($result) > 0) : ?>
+                    <?php while ($row = mysqli_fetch_assoc($result)) : ?>
+                        <tr>
+                            <form method="POST">
+                                <td><?php echo htmlspecialchars($row['project_title']); ?></td>
+                                <td><?php echo htmlspecialchars($row['project_description']); ?></td>
+                                <td><?php echo htmlspecialchars($row['team_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['submission_date']); ?></td>
+                                
+                                <!-- Mentor Comments Input -->
+                                <td>
+                                    <input type="text" name="mentor_comments" class="mentor-comments" placeholder="Enter comments" value="<?php echo htmlspecialchars($row['mentor_comments']); ?>">
+                                </td>
+
+                                <!-- Action Dropdown -->
+                                <td>
+                                    <select name="action_status">
+                                        <option value="Pending" <?php echo ($row['status'] == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Approved" <?php echo ($row['status'] == 'Approved') ? 'selected' : ''; ?>>Approved</option>
+                                        <option value="Disapproved" <?php echo ($row['status'] == 'Disapproved') ? 'selected' : ''; ?>>Disapproved</option>
+                                    </select>
+                                    <input type="hidden" name="project_id" value="<?php echo $row['id']; ?>">
+                                    <button type="submit">Update</button>
+                                </td>
+                            </form>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="7">No projects found.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
-   
-<section class="project-section">
-    
-
 </section>
-
-
-
 <script src="assets/js/app.js"></script>
 </body>
 </html>
+<?php
+mysqli_close($conn); // Close the database connection
+?>

@@ -58,7 +58,7 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mentors</title>
+    <title>PMS Mentor Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/addstud.css">
@@ -94,8 +94,8 @@ $conn->close();
                     <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
                 </div>
             </li>
-            <li><a href="project_list.php"><i class="fas fa-address-card"></i>Projects</a></li>
-            <li><a href="submission.html"><i class="fas fa-blog"></i>Submission</a></li>
+            <li><a href="projects.php"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="receive.php"><i class="fas fa-blog"></i>Submission</a></li>
             <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
             <li><a href="cal.php"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
         </ul>

@@ -200,11 +200,11 @@ CREATE TABLE allocated_mentors (
 );
 CREATE TABLE remarks (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
     staff_email VARCHAR(255) NOT NULL,
-    team_name VARCHAR(100) NOT NULL,
-    remark TEXT NOT NULL,
+    content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (staff_email) REFERENCES staff(email) ON DELETE CASCADE
+    FOREIGN KEY (project_id) REFERENCES projects(id)
 );
 
 

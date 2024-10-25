@@ -5,7 +5,8 @@ include 'includes/profile_pic.php';
 
 $username = $_SESSION['username'] ?? 'Vaishali'; 
 $role = $_SESSION['role'] ?? 'N/A';
-$profile_image = $_SESSION['profile_image'] ?? 'https://example.com/default.jpg';
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 
 $sql = "SELECT title, team_name, status, leader AS team_leader, members, created_at, abstract, ppt_path, mentor_id FROM projects";
 $result = $conn->query($sql);
@@ -27,37 +28,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($staffResult->num_rows == 0) {
             echo "<script>alert('Invalid email address.');</script>";
+        } else {
+            $staffRow = $staffResult->fetch_assoc();
+            $staff_id = $staffRow['id'];
+
+            $checkProject = $conn->prepare("SELECT id FROM projects WHERE id = ?");
+            $checkProject->bind_param("i", $project_id);
+            $checkProject->execute();
+            $projectResult = $checkProject->get_result();
+
+            if ($projectResult->num_rows == 0) {
+                die('Invalid project ID.');
+            }
+
+            $insertQuery = $conn->prepare("INSERT INTO remarks (project_id, staff_email, remark) VALUES (?, ?, ?)");
+            $insertQuery->bind_param("iss", $project_id, $email, $remark);
+
+            if ($insertQuery->execute()) {
+                echo "<script>alert('Remark added successfully');</script>";
+            } else {
+                echo "<script>alert('Error: " . $insertQuery->error . "');</script>";
+            }
+
+            $insertQuery->close();
+            $checkProject->close();
         }
+        $stmt->close();
     }
-
-    $staffRow = $staffResult->fetch_assoc();
-    $staff_id = $staffRow['id'];
-
-    
-    $checkProject = $conn->prepare("SELECT id FROM projects WHERE id = ?");
-    $checkProject->bind_param("i", $project_id);
-    $checkProject->execute();
-    $projectResult = $checkProject->get_result();
-
-    if ($projectResult->num_rows == 0) {
-        die('Invalid project ID.');
-    }
-
-   
-    $insertQuery = $conn->prepare("INSERT INTO remarks (project_id, staff_email, content) VALUES (?, ?, ?)");
-    $insertQuery->bind_param("iss", $project_id, $email, $remark);
-
-    if ($insertQuery->execute()) {
-        echo "Remark added successfully";
-    } else {
-        echo "Error: " . $insertQuery->error;
-    }
-
-    $insertQuery->close();
-    $stmt->close();
-    $checkProject->close();
 }
-
 
 ?>
 
@@ -135,30 +133,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         margin-right: 10px;
     }
 
-    .remarks-button {
-        padding: 10px 15px;
-        background-color: #3498db;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
+    .remarks-section {
+    margin-top: 20px; 
+    padding: 15px; 
+    background-color: #f1f1f1; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+}
 
-    .remarks-button:hover {
-        background-color: #2980b9;
-    }
+.remarks-form {
+    margin-top: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    background-color: #fff; 
+    padding: 15px; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+}
 
-    .remarks-history {
-        margin-top: 10px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        background-color: #f9f9f9;
-        width: calc(100% - 30px); 
-        margin-left: auto;
-        margin-right: auto; 
-    }
+.remarks-form input[type="text"],
+.remarks-form textarea {
+    width: 100%; 
+    margin: 5px 0; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+}
 
+.remarks-button {
+    padding: 10px 15px; 
+    background-color: #3498db; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background 0.3s; 
+}
+
+.remarks-button:hover {
+    background-color: #2980b9; 
+}
+
+.remarks-history {
+    margin-top: 10px; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    background-color: #f9f9f9; 
+}
     .team-members-container {
         display: flex;
         flex-wrap: wrap;
@@ -257,76 +278,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
 
-<div class="bottom-section">
-    <div class="left-bottom">
-        <div class="team-members-container">
-            <?php
-            
-            $members = explode(',', $row['members']); 
-            $team_leader = $row['team_leader'];
-            $isLeaderDisplayed = false;
-            
-            foreach ($members as $member) {
-                echo '<div class="team-member-icon">';
-                echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Member Image">'; 
-                echo '<span>' . htmlspecialchars(trim($member)) . '</span>';
-                echo '</div>';
-            }
-            
-            echo '<div class="team-member-icon">';
-            echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Leader Image">'; 
-            echo '<span>' . htmlspecialchars(trim($team_leader)) . ' (Leader)</span>'; 
-            echo '</div>';
-            ?>
-        </div>
-    </div>
                 <div class="bottom-section">
                     <div class="left-bottom">
-                        <form method="POST" action="">
-                            <input type="hidden" name="project_id" value="<?php echo $row['id']; ?>">
-                            <input type="text" name="email" placeholder="Enter staff email" required>
-                            <textarea name="remark" class="textarea-style" placeholder="Add your remark" required></textarea>
-                            <button type="submit" class="remarks-button">Add Remark</button>
-                        </form>
-                    </div>
-                    <div class="right-bottom">
-                        <button class="remarks-button" onclick="toggleRemarks(<?php echo $row['id']; ?>)">View Remarks</button>
-                        <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
+                        <div class="team-members-container">
                             <?php
+                            $members = explode(',', $row['members']); 
+                            $team_leader = isset($row['leader']) ? $row['leader'] : 'Unknown Leader'; 
                             
-                            $remarksQuery = $conn->prepare("SELECT content FROM remarks WHERE project_id = ?");
-                            $remarksQuery->bind_param("i", $row['id']);
-                            $remarksQuery->execute();
-                            $remarksResult = $remarksQuery->get_result();
-                            
-                            if ($remarksResult->num_rows > 0) {
-                                while ($remarkRow = $remarksResult->fetch_assoc()) {
-                                    echo "<p>" . htmlspecialchars($remarkRow['content']) . "</p>";
-                                }
-                            } else {
-                                echo "<p>No remarks yet.</p>";
+                            foreach ($members as $member) {
+                                echo '<div class="team-member-icon">';
+                                echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Member Image">'; 
+                                echo '<span>' . htmlspecialchars(trim($member)) . '</span>';
+                                echo '</div>';
                             }
+                            
+                            echo '<div class="team-member-icon">';
+                            echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Leader Image">'; 
+                            echo '<span>' . htmlspecialchars(trim($team_leader)) . ' (Leader)</span>'; 
+                            echo '</div>';
                             ?>
                         </div>
                     </div>
                 </div>
             </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <p>No projects found.</p>
-    <?php endif; ?>
-</div>
+<!-- Remarks Section -->
+<div class="remarks-section">
+    <button class="remarks-button" onclick="toggleRemarks(<?php echo $row['id']; ?>)">Add/View Remarks</button>
+    <div id="remarks-form-<?php echo $row['id']; ?>" class="remarks-form" style="display:none;">
+        <form method="POST" action="">
+            <input type="hidden" name="project_id" value="<?php echo $row['id']; ?>">
+            <input type="text" name="email" placeholder="Enter staff email" required>
+            <textarea name="remark" class="textarea-style" placeholder="Add your remark" required></textarea>
+            <button type="submit" class="remarks-button">Submit Remark</button>
+        </form>
+    </div>
+    <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
+        <?php
+        ?>
+    </div>
+</div> 
+
+<?php endwhile; ?>
+<?php else: ?>
+    <p>No projects found.</p>
+<?php endif; ?>
+
+</div> 
 
 <script>
-    function toggleRemarks(id) {
-        const remarksDiv = document.getElementById('remarks-' + id);
-        remarksDiv.style.display = (remarksDiv.style.display === "none" || remarksDiv.style.display === "") ? "block" : "none";
+function toggleRemarks(projectId) {
+    const remarksForm = document.getElementById(`remarks-form-${projectId}`);
+    const remarksHistory = document.getElementById(`remarks-${projectId}`);
+
+    // Toggle the display of the remarks form
+    if (remarksForm.style.display === 'none') {
+        remarksForm.style.display = 'block';
+        remarksHistory.style.display = 'none'; // Hide the history when form is shown
+    } else {
+        remarksForm.style.display = 'none';
+        remarksHistory.style.display = 'block'; // Show history when form is hidden
     }
+    // Toggle remarks history display
+    remarksHistory.style.display = remarksHistory.style.display === "none" ? "block" : "none";
+}
+
+function toggleRemarks(projectId) {
+    const remarksForm = document.getElementById(`remarks-form-${projectId}`);
+    const remarksHistory = document.getElementById(`remarks-${projectId}`);
+
+    if (remarksForm.style.display === "none") {
+        remarksForm.style.display = "block";
+        remarksHistory.style.display = "block";
+    } else {
+        remarksForm.style.display = "none";
+        remarksHistory.style.display = "none";
+    }
+}
+
+// Add this script for the buttons
+document.querySelectorAll('.view-remarks-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const remarksHistory = this.closest('.project-details').querySelector('.remarks-history');
+        remarksHistory.style.display = remarksHistory.style.display === 'block' ? 'none' : 'block';
+    });
+});
 </script>
+
 
 </body>
 </html>
-
-<?php
-$conn->close();
-?>

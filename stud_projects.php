@@ -89,7 +89,7 @@ $conn->close();
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <title>PMS</title>
+    <title>PMS Student Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
@@ -238,6 +238,7 @@ $conn->close();
 }
 
 .edit-button {
+    margin-left: 60%;
     background-color: #FFFFFF; /* Background for Edit button */
 }
 
@@ -318,10 +319,7 @@ $conn->close();
 
     <section class="main-content">
         <div class="container">
-            <div class="header">
-                <h1>Your Project Dashboard</h1>
-            </div>
-
+    
             <div class="form-container" id="form-container">
                 <button id="create-project-btn">Create New Project</button>
                 <form action="stud_projects.php" method="POST">
@@ -359,7 +357,7 @@ $conn->close();
                         <p><strong>Status:</strong> <?php echo $project['status']; ?></p><br>
                         <div class="project-buttons">
                             <a href="edit_projects.php?edit_id=<?php echo $project['id']; ?>" class="edit-button">Edit</a>
-                            <a href="view_projects.php?view_id=<?php echo $project['id']; ?>" class="view-button">View</a>
+                            <!-- <a href="view_projects.php?view_id=<?php echo $project['id']; ?>" class="view-button">View</a> -->
                             <a href="stud_projects.php?delete_id=<?php echo $project['id']; ?>" class="delete-button">Delete</a>
                         </div>
                     </div>

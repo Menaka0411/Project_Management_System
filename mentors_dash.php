@@ -51,7 +51,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
                     <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
                 </div>
             </li>
-            <li><a href="project_list.php"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="projects.php"><i class="fas fa-address-card"></i>Projects</a></li>
             <li><a href="receive.php"><i class="fas fa-blog"></i>Submission</a></li>
             <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
             <li><a href="cal.php"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
@@ -130,10 +130,10 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
                 </a>
             </div>
             <div class="info">
-                <a href="allocate_mentor.php">
-                    <h2 class="info-heading">Allocating Mentors</h2>
+                <a href="projects.php">
+                    <h2 class="info-heading">Total Projects</h2>
                     <div class="info-details">
-                        <h3 class="info-numbers">Teams</h3> 
+                        <h3 class="info-numbers">3</h3> 
                     </div>
                 </a>
             </div>

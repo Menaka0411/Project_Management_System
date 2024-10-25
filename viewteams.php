@@ -52,8 +52,8 @@ include 'includes/profile_pic.php';
                     <a href="list_stud.php"><i class="fas fa-list"></i> List Students</a>
                 </div>
             </li>
-            <li><a href="project_list.php"><i class="fas fa-address-card"></i>Projects</a></li>
-            <li><a href="submission.html"><i class="fas fa-blog"></i>Submission</a></li>
+            <li><a href="projects.php"><i class="fas fa-address-card"></i>Projects</a></li>
+            <li><a href="receive.php"><i class="fas fa-blog"></i>Submission</a></li>
             <li><a href="viewteams.php"><i class="fas fa-address-book"></i>Teams</a></li>
             <li><a href="cal.php"><i class="fas fa-calendar-alt"></i>Schedule</a></li>
         </ul>
@@ -88,84 +88,39 @@ include 'includes/profile_pic.php';
         <!-- Team cards section -->
         <section class="section-team">
             <div class="team-card" data-team-id="team12"> 
-                <h3>Team Gamma</h3>
+                <h3>Team Binders</h3>
                 <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2024</p>
+                <p><strong>Year:</strong> 1</p>
                 <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Alice, Bob, Charlie</p>
+                <p><strong>Team Members:</strong> Menaka M,Vaishali U</p>
                 <div class="action-buttons">
                     <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
                     <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
                 </div>
             </div>
             <div class="team-card" data-team-id="team123"> 
-                <h3>Team Gamma</h3>
+                <h3>Team Peaky</h3>
                 <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2024</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Alice, Bob, Charlie</p>
+                <p><strong>Year:</strong> 2</p>
+                <p><strong>Semester:</strong> 3</p>
+                <p><strong>Team Members:</strong> Gv D,HAri P,Gayu S</p>
                 <div class="action-buttons" >
                     <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
                     <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
                 </div>
             </div>
             <div class="team-card" data-team-id="team18"> 
-                <h3>Team Gamma</h3>
+                <h3>Team Ghost</h3>
                 <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2024</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Alice, Bob, Charlie</p>
+                <p><strong>Year:</strong> 3</p>
+                <p><strong>Semester:</strong> 5</p>
+                <p><strong>Team Members:</strong> Pavi T,Aarthi S,Latika M,Loki M</p>
                 <div class="action-buttons">
                     <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
                     <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
                 </div>
             </div>
-            <div class="team-card" data-team-id="team15">
-                <h3>Team Gamma</h3>
-                <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2024</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Alice, Bob, Charlie</p>
-                <div class="action-buttons">
-                    <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
-                    <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
-            </div>
-            <div class="team-card" data-team-id="team155">
-                <h3>Team Gamma</h3>
-                <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2024</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Alice, Bob, Charlie</p>
-                <div class="action-buttons">
-                    <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
-                    <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
-            </div>
-
-            <div class="team-card" data-team-id="team193">
-                <h3>Team Alpha</h3>
-                <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2024</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Alice, Bob, Charlie</p>
-                <div class="action-buttons">
-                    <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
-                    <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
-            </div>
-
-            <div class="team-card" data-team-id="team456"> 
-                <h3>Team Beta</h3>
-                <p><strong>Department:</strong> Mechanical Engineering</p>
-                <p><strong>Year:</strong> 2024</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> David, Emma, Frank</p>
-                <div class="action-buttons">
-                    <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
-                    <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
-            </div>
+        
         </section>
     </div>
 

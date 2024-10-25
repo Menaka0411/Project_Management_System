@@ -1,56 +1,66 @@
 <?php
 session_start();
-include 'db_connection.php';
+include 'db_connection.php'; 
 include 'includes/profile_pic.php';
 $roll_number = $_SESSION['roll_number'] ?? 'N/A'; 
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 
-$student_team = $_SESSION['team'];
-$stmt = $conn->prepare("SELECT r.remark, s.email AS staff_email FROM remarks r JOIN staff s ON r.staff_id = s.id JOIN projects p ON r.project_id = p.id WHERE p.team = ?");
-$stmt->bind_param("s", $student_team);
-$stmt->execute();
-$remarksResult = $stmt->get_result();
+$sql = "SELECT title, team_name, status, leader AS team_leader, members, created_at, abstract, ppt_path, mentor_id FROM projects";
+$result = $conn->query($sql);
+$result = $conn->query("SELECT * FROM projects");
 
-if ($remarksResult->num_rows > 0) {
-    echo "<h3>Remarks from Staff:</h3>";
-    while ($row = $remarksResult->fetch_assoc()) {
-        echo "<div>";
-        echo "<p><b>Staff:</b> " . htmlspecialchars($row['staff_email']) . "</p>";
-        echo "<p><b>Remark:</b> " . nl2br(htmlspecialchars($row['remark'])) . "</p>";
-        echo "<form action='stud_reply.php' method='POST'>
-                <input type='hidden' name='staff_email' value='" . htmlspecialchars($row['staff_email']) . "'>
-                <textarea name='student_message' placeholder='Reply to this remark' required></textarea>
-                <input type='submit' value='Send'>
-              </form>";
-        echo "</div><br>";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? null;
+    $project_id = $_POST['project_id'] ?? null;
+    $remark = $_POST['remark'] ?? '';
+
+    if (!$email || !$project_id) {
+        echo "<script>alert('Email and Project ID are required.');</script>";
+    } else {
+        
+        $stmt = $conn->prepare("SELECT id FROM staff WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $staffResult = $stmt->get_result();
+
+        if ($staffResult->num_rows == 0) {
+            echo "<script>alert('Invalid email address.');</script>";
+        } else {
+            $staffRow = $staffResult->fetch_assoc();
+            $staff_id = $staffRow['id'];
+
+            $checkProject = $conn->prepare("SELECT id FROM projects WHERE id = ?");
+            $checkProject->bind_param("i", $project_id);
+            $checkProject->execute();
+            $projectResult = $checkProject->get_result();
+
+            if ($projectResult->num_rows == 0) {
+                die('Invalid project ID.');
+            }
+
+            $insertQuery = $conn->prepare("INSERT INTO remarks (project_id, staff_email, remark) VALUES (?, ?, ?)");
+            $insertQuery->bind_param("iss", $project_id, $email, $remark);
+
+            if ($insertQuery->execute()) {
+                echo "<script>alert('Remark added successfully');</script>";
+            } else {
+                echo "<script>alert('Error: " . $insertQuery->error . "');</script>";
+            }
+
+            $insertQuery->close();
+            $checkProject->close();
+        }
+        $stmt->close();
     }
-} else {
-    echo "<p>No remarks found for your team.</p>";
 }
 
-// Fetch messages
-$query = "SELECT m.message, s.email AS staff_email FROM messages m JOIN staff s ON m.staff_id = s.id WHERE m.team_name = '$student_team' ORDER BY m.id ASC";
-$messageResult = $conn->query($query);
-
-if ($messageResult->num_rows > 0) {
-    echo "<h3>Conversation History:</h3>";
-    while ($row = $messageResult->fetch_assoc()) {
-        echo "<div>";
-        echo "<p><b>Staff:</b> " . htmlspecialchars($row['staff_email']) . "</p>";
-        echo "<p><b>Message:</b> " . nl2br(htmlspecialchars($row['message'])) . "</p>";
-        echo "</div><br>";
-    }
-} else {
-    echo "<p>No conversation history found for your team.</p>";
-}
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <title>PMS Student Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -61,141 +71,152 @@ $conn->close();
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
-    <style>
-        .flex-container {
-            margin-top: 7%;
-            margin-left: 15%;
-            margin-right: 30px;
-            display: flex;
-            flex-direction: column;
-        }
+    <link rel="stylesheet" href="../../assets/vendor/aos/dist/aos.css">
+   <style>
+         .flex-container {
+        margin-top: 7%;
+        margin-left: 15%;
+        margin-right: 30px;
+        display: flex;
+        flex-direction: column;
+    }
 
-        .project-details {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+    .project-details {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-        .top-section {
-            display: flex;
-            justify-content: space-between;
-        }
+    .top-section {
+        display: flex;
+        justify-content: space-between;
+    }
 
-        .left-top {
-            width: 50%;
-        }
+    .left-top {
+        width: 50%;
+    }
 
-        .right-top {
-            width: 50%;
-            padding-left: 20px; 
-        }
+    .right-top {
+        width: 50%;
+        padding-left: 20px; 
+    }
 
-        .bottom-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
+    .bottom-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
 
-        .left-bottom {
-            width: 50%;
-        }
+    .left-bottom {
+        width: 50%;
+    }
 
-        .right-bottom {
-            width: 50%;
-            text-align: right; 
-        }
+    .right-bottom {
+        width: 50%;
+        text-align: right; 
+    }
 
-        .team-member {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px; 
-        }
+    .team-member {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px; 
+    }
 
-        .team-member img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
+    .team-member img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
 
-        .remarks-button {
-            padding: 10px 15px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    .remarks-section {
+    margin-top: 20px; 
+    padding: 15px; 
+    background-color: #f1f1f1; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+}
 
-        .remarks-button:hover {
-            background-color: #2980b9;
-        }
+.remarks-form {
+    margin-top: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    background-color: #fff; 
+    padding: 15px; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+}
 
-        .remarks-history {
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-            display: none; 
-        }
+.remarks-form input[type="text"],
+.remarks-form textarea {
+    width: 100%; 
+    margin: 5px 0; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+}
 
-        .remarks-input {
-            display: none; 
-            margin-top: 10px;
-        }
+.remarks-button {
+    padding: 10px 15px; 
+    background-color: #3498db; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background 0.3s; 
+}
 
-        .textarea-style {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
+.remarks-button:hover {
+    background-color: #2980b9; 
+}
 
+.remarks-history {
+    margin-top: 10px; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    background-color: #f9f9f9; 
+}
+    .team-members-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        width: calc(100% - 30px); 
+    }
 
-        .team-members-container {
-            display: flex;
-            flex-wrap: wrap;
-            margin-top: 10px;
-            width: calc(100% - 30px); 
-        }
+    .team-member-icon {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+    }
 
-        .team-member-icon {
-            display: flex;
-            align-items: center;
-            margin-right: 15px;
-        }
+    .team-member-icon img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
 
-        .team-member-icon img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
+    .leader {
+        font-weight: bold;
+        color: #2c3e50;
+    }
 
-        .leader {
-            font-weight: bold;
-            color: #2c3e50;
-        }
+    .project-details h2 {
+        font-size: 1.5em; 
+        margin-bottom: 10px;
+    }
 
-        .project-details h2 {
-            font-size: 1.5em; 
-            margin-bottom: 10px; 
-        }
-
-        .project-details p {
-            font-size: 1.1em; 
-            margin: 5px 0;
-        }
+    .project-details p {
+        font-size: 1.1em; 
+        margin: 5px 0; 
+    }
     </style>
 </head>
 <body>
-
-<div class="wrapper">
+<div class="wrapper js-scroll-nav navbar navbar-light bg-light">
     <div class="sidebar">
             <div class="circle" onclick="document.querySelector('.file-upload').click()">
                 <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
@@ -227,7 +248,7 @@ $conn->close();
 
     <div class="main_header">
         <div class="header">
-            <h1>PROGRESS</h1>
+            <h1>PROJECT PROGRESS</h1>
             <div class="header_icons">
                 <div class="search">
                     <input type="text" placeholder="Search..." />
@@ -261,68 +282,88 @@ $conn->close();
                     <div class="left-bottom">
                         <div class="team-members-container">
                             <?php
-                           
                             $members = explode(',', $row['members']); 
-                            $team_leader = $row['team_leader']; 
-                            $isLeaderDisplayed = false;
-
-                            foreach ($members as $member):
-                               
-                                $memberImage = 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; 
-                                ?>
-                                <div class="team-member">
-                                    <div class="team-member-icon">
-                                        <img src="<?php echo htmlspecialchars($memberImage); ?>" alt="Team Member">
-                                        <span><?php echo htmlspecialchars(trim($member)); ?></span>
-                                    </div>
-                                </div>
-                                <?php if (trim($member) === trim($team_leader)) $isLeaderDisplayed = true; ?>
-                            <?php endforeach; ?>
-                            <?php if (!$isLeaderDisplayed): ?>
-                                <div class="team-member">
-                                    <span class="leader"><?php echo htmlspecialchars($team_leader); ?></span> (Leader)
-                                </div>
-                            <?php endif; ?>
+                            $team_leader = isset($row['leader']) ? $row['leader'] : 'Unknown Leader'; 
+                            
+                            foreach ($members as $member) {
+                                echo '<div class="team-member-icon">';
+                                echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Member Image">'; 
+                                echo '<span>' . htmlspecialchars(trim($member)) . '</span>';
+                                echo '</div>';
+                            }
+                            
+                            echo '<div class="team-member-icon">';
+                            echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Leader Image">'; 
+                            echo '<span>' . htmlspecialchars(trim($team_leader)) . ' (Leader)</span>'; 
+                            echo '</div>';
+                            ?>
                         </div>
-                    </div>
-                    <button class="remarks-button" onclick="toggleRemarkForm('<?php echo $row['mentor_id']; ?>')">Share Remarks</button>
-
-                    <form id="remark-form-<?php echo $row['mentor_id']; ?>" method="POST" class="remarks-input">
-                        <input type="hidden" name="project_id" value="<?php echo $row['mentor_id']; ?>">
-                        <textarea name="remark" class="textarea-style" rows="3" placeholder="Enter your remark here..." required></textarea><br>
-                        <input type="submit" name="share_remark" value="Submit" class="remarks-button">
-                    </form>
-
-                    <div class="remarks-history" id="remarks-history-<?php echo $row['mentor_id']; ?>">
-                        <h4>Remarks History:</h4>
-                        <?php
-                        $stmt->bind_param("i", $row['mentor_id']);
-                        $stmt->execute();
-                        $historyResult = $stmt->get_result();
-                        while ($historyRow = $historyResult->fetch_assoc()): ?>
-                            <p><strong><?php echo htmlspecialchars($historyRow['staff_email']); ?>:</strong> <?php echo nl2br(htmlspecialchars($historyRow['remark'])); ?></p>
-                        <?php endwhile; ?>
                     </div>
                 </div>
             </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <p>No projects found for your team.</p>
-    <?php endif; ?>
-</div>
+<!-- Remarks Section -->
+<div class="remarks-section">
+    <button class="remarks-button" onclick="toggleRemarks(<?php echo $row['id']; ?>)">Add/View Message</button>
+    <div id="remarks-form-<?php echo $row['id']; ?>" class="remarks-form" style="display:none;">
+        <form method="POST" action="">
+            <input type="hidden" name="project_id" value="<?php echo $row['id']; ?>">
+            <input type="text" name="email" placeholder="Enter staff email" required>
+            <textarea name="remark" class="textarea-style" placeholder="Add your remark" required></textarea>
+            <button type="submit" class="remarks-button">Submit Remark</button>
+        </form>
+    </div>
+    <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
+        <?php
+        ?>
+    </div>
+</div> 
+
+<?php endwhile; ?>
+<?php else: ?>
+    <p>No projects found.</p>
+<?php endif; ?>
+
+</div> 
 
 <script>
-    function toggleRemarkForm(mentorId) {
-        const form = document.getElementById('remark-form-' + mentorId);
-        const history = document.getElementById('remarks-history-' + mentorId);
-        if (form.style.display === "none" || form.style.display === "") {
-            form.style.display = "block";
-            history.style.display = "block";
-        } else {
-            form.style.display = "none";
-            history.style.display = "none";
-        }
+function toggleRemarks(projectId) {
+    const remarksForm = document.getElementById(`remarks-form-${projectId}`);
+    const remarksHistory = document.getElementById(`remarks-${projectId}`);
+
+    // Toggle the display of the remarks form
+    if (remarksForm.style.display === 'none') {
+        remarksForm.style.display = 'block';
+        remarksHistory.style.display = 'none'; // Hide the history when form is shown
+    } else {
+        remarksForm.style.display = 'none';
+        remarksHistory.style.display = 'block'; // Show history when form is hidden
     }
+    // Toggle remarks history display
+    remarksHistory.style.display = remarksHistory.style.display === "none" ? "block" : "none";
+}
+
+function toggleRemarks(projectId) {
+    const remarksForm = document.getElementById(`remarks-form-${projectId}`);
+    const remarksHistory = document.getElementById(`remarks-${projectId}`);
+
+    if (remarksForm.style.display === "none") {
+        remarksForm.style.display = "block";
+        remarksHistory.style.display = "block";
+    } else {
+        remarksForm.style.display = "none";
+        remarksHistory.style.display = "none";
+    }
+}
+
+// Add this script for the buttons
+document.querySelectorAll('.view-remarks-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const remarksHistory = this.closest('.project-details').querySelector('.remarks-history');
+        remarksHistory.style.display = remarksHistory.style.display === 'block' ? 'none' : 'block';
+    });
+});
 </script>
+
+
 </body>
 </html>

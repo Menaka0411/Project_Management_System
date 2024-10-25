@@ -32,7 +32,7 @@ $total_projects = $row['total_projects'] ?? 0;
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PMS</title>
+    <title>PMS Student Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
@@ -50,7 +50,7 @@ $total_projects = $row['total_projects'] ?? 0;
         }
         .main-content {
             margin-top: 100px;
-            margin-left: 100px;
+            margin-left: 5px;
         }
     
     </style>
@@ -115,19 +115,19 @@ $total_projects = $row['total_projects'] ?? 0;
             <div class="info">
                 <h2 class="info-heading">Completed Projects</h2>
                 <div class="info-details">
-                    <h3 class="info-numbers"><?php echo $dashboard_data['completed_projects'] ?? '0'; ?></h3>
+                    <h3 class="info-numbers"><?php echo $dashboard_data['completed_projects'] ?? '1'; ?></h3>
                 </div>
             </div>
             <div class="info">
                 <h2 class="info-heading">Ongoing Projects</h2>
                 <div class="info-details">
-                    <h3 class="info-numbers"><?php echo $dashboard_data['ongoing_projects'] ?? '0'; ?></h3>
+                    <h3 class="info-numbers"><?php echo $dashboard_data['ongoing_projects'] ?? '1'; ?></h3>
                 </div>
             </div>
             <div class="info">
                 <h2 class="info-heading">Overdue Projects</h2>
                 <div class="info-details">
-                    <h3 class="info-numbers"><?php echo $dashboard_data['overdue_projects'] ?? '0'; ?></h3>
+                    <h3 class="info-numbers"><?php echo $dashboard_data['overdue_projects'] ?? '1'; ?></h3>
                 </div>
             </div>
         </div>
