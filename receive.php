@@ -12,29 +12,6 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
 $sql = "SELECT title, team_name, status, leader, members, abstract, ppt_path, mentor_id FROM projects";
 $result = $conn->query($sql);
 
-// Handle file viewing logic
-if (isset($_GET['file'])) {
-    $file = $_GET['file'];
-
-    // Validate and sanitize the file path to prevent security issues
-    $filePath = './uploads/' . basename($file);
-
-    // Check if the file exists
-    if (file_exists($filePath)) {
-        // Set headers to display the file in the browser
-        header('Content-Type: application/vnd.ms-powerpoint'); // For .ppt files
-        header('Content-Disposition: inline; filename="' . basename($file) . '"');
-        header('Content-Length: ' . filesize($filePath));
-        
-        // Read the file and send it to the browser
-        readfile($filePath);
-        exit;
-    } else {
-        echo 'File not found.';
-    }
-} else {
-    echo '';
-}
 ?>
 
 <!DOCTYPE html>
@@ -55,27 +32,54 @@ if (isset($_GET['file'])) {
 .table-container {
             display: flex;
             justify-content: center; /* Center the table horizontally */
-            align-items: center; /* Center the table vertically */
-            margin: 20px; /* Space around the table */
+            margin-top: 10%; /* Space around the table */
         }
 
         table {
-            width: 80%; /* Set a width for the table */
             border-collapse: collapse;
+            margin: 5px auto; /* Center the table */
+            margin-left: 20%; /* Move the table slightly to the right */
+            font-size: 1em;
+            width: 70%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        
         }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        table thead tr {
+            background-color: #4b4276;
+            color: #ffffff;
             text-align: left;
+            font-weight: bold;
         }
 
-        th {
-            background-color: #f2f2f2;
+        table th, table td {
+            padding: 12px 15px;
+            text-align: center;
+            vertical-align: middle;
         }
 
-        tr:hover {
-            background-color: #f1f1f1;
+        table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        table tbody tr:hover {
+            background-color: #f3f3f3;
+        }
+
+        table tbody tr:last-of-type {
+            border-bottom: 2px solid #4b4276;
+        }
+
+        /* Profile link styling */
+        table td a {
+            text-decoration: none;
+            color: #4b4276;
+            font-weight: bold;
+        }
+
+        table td a:hover {
+            color: #4b4276;
+            text-decoration: underline;
         }
 
         /* Additional styles for dropdown */
@@ -135,7 +139,7 @@ if (isset($_GET['file'])) {
         <hr>
     </div>
 </div>
-
+<div class="table-container">
     <table>
         <thead>
             <tr>
@@ -172,7 +176,7 @@ if (isset($_GET['file'])) {
             <?php endif; ?>
         </tbody>
     </table>
-
+    </div>
     <script>
         function handleAction(select, mentorId) {
             const action = select.value;

@@ -2,38 +2,63 @@
 session_start();
 include 'db_connection.php';
 include 'includes/profile_pic.php';
+
 $username = $_SESSION['username'] ?? 'Vaishali'; 
 $role = $_SESSION['role'] ?? 'N/A';
-$mentor_data = $_SESSION['mentor_data'] ?? null;
-$dashboard_data = $_SESSION['dashboard_data'] ?? null;
-$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
+$profile_image = $_SESSION['profile_image'] ?? 'https://example.com/default.jpg';
 
-$sql = "SELECT title, team_name, status, leader, members, abstract, ppt_path, mentor_id FROM projects";
+$sql = "SELECT title, team_name, status, leader AS team_leader, members, created_at, abstract, ppt_path, mentor_id FROM projects";
 $result = $conn->query($sql);
+$result = $conn->query("SELECT * FROM projects");
 
-// Handle file viewing logic
-if (isset($_GET['file'])) {
-    $file = $_GET['file'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? null;
+    $project_id = $_POST['project_id'] ?? null;
+    $remark = $_POST['remark'] ?? '';
 
-    // Validate and sanitize the file path to prevent security issues
-    $filePath = './uploads/' . basename($file);
-
-    // Check if the file exists
-    if (file_exists($filePath)) {
-        // Set headers to display the file in the browser
-        header('Content-Type: application/vnd.ms-powerpoint'); // For .ppt files
-        header('Content-Disposition: inline; filename="' . basename($file) . '"');
-        header('Content-Length: ' . filesize($filePath));
-        
-        // Read the file and send it to the browser
-        readfile($filePath);
-        exit;
+    if (!$email || !$project_id) {
+        echo "<script>alert('Email and Project ID are required.');</script>";
     } else {
-        echo 'File not found.';
+        // Prepare statement to get staff_id from email
+        $stmt = $conn->prepare("SELECT id FROM staff WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $staffResult = $stmt->get_result();
+
+        if ($staffResult->num_rows == 0) {
+            echo "<script>alert('Invalid email address.');</script>";
+        }
     }
-} else {
-    echo 'No file specified.';
+
+    $staffRow = $staffResult->fetch_assoc();
+    $staff_id = $staffRow['id'];
+
+    // Check if the project ID exists in the projects table
+    $checkProject = $conn->prepare("SELECT id FROM projects WHERE id = ?");
+    $checkProject->bind_param("i", $project_id);
+    $checkProject->execute();
+    $projectResult = $checkProject->get_result();
+
+    if ($projectResult->num_rows == 0) {
+        die('Invalid project ID.');
+    }
+
+    // Insert into remarks table using staff_id
+    $insertQuery = $conn->prepare("INSERT INTO remarks (project_id, staff_email, content) VALUES (?, ?, ?)");
+    $insertQuery->bind_param("iss", $project_id, $email, $remark);
+
+    if ($insertQuery->execute()) {
+        echo "Remark added successfully";
+    } else {
+        echo "Error: " . $insertQuery->error;
+    }
+
+    $insertQuery->close();
+    $stmt->close();
+    $checkProject->close();
 }
+
+// Do not close the connection yet, as we still need it to fetch remarks
 ?>
 
 <!DOCTYPE html>
@@ -49,60 +74,132 @@ if (isset($_GET['file'])) {
     <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap">
     <style>
-      /* Table styling within a specific container (e.g., class 'table-container') */
-.table-container table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-}
+         .flex-container {
+        margin-top: 7%;
+        margin-left: 15%;
+        margin-right: 30px;
+        display: flex;
+        flex-direction: column;
+    }
 
-.table-container th, .table-container td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
+    .project-details {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-.table-container th {
-    background-color: #f2f2f2;
-}
+    .top-section {
+        display: flex;
+        justify-content: space-between;
+    }
 
-.table-container tr:hover {
-    background-color: #f1f1f1;
-}
+    .left-top {
+        width: 50%;
+    }
 
-/* Style for the abstract to prevent excessive wrapping */
-.table-container td {
-    white-space: normal; /* Allow text wrapping */
-    word-wrap: break-word; /* Break long words if necessary */
-}
+    .right-top {
+        width: 50%;
+        padding-left: 20px; /* Add some space between columns */
+    }
 
-/* Dropdown styling */
-.table-container .action-dropdown {
-    padding: 10px 15px;  /* Increase the padding for a bigger appearance */
-    font-size: 1em;      /* Adjust font size as needed */
-    border-radius: 5px;  /* Maintain rounded corners */
-    border: 1px solid #ddd; /* Consistent border */
-    width: 120px;        /* Set width as needed */
-    cursor: pointer;     /* Show pointer cursor on hover */
-}
+    .bottom-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
 
-        /* Dropdown styling */
-        .action-dropdown {
-            padding: 10px 15px;  /* Increase the padding for a bigger appearance */
-            font-size: 1em;      /* Adjust font size as needed */
-            border-radius: 5px;  /* Maintain rounded corners */
-            border: 1px solid #ddd; /* Consistent border */
-            width: 120px;        /* Set width as needed */
-            cursor: pointer;     /* Show pointer cursor on hover */
-        }
+    .left-bottom {
+        width: 50%;
+    }
+
+    .right-bottom {
+        width: 50%;
+        text-align: right; /* Align remarks button to the right */
+    }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px; /* Space between team members */
+    }
+
+    .team-member img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .remarks-button {
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .remarks-button:hover {
+        background-color: #2980b9;
+    }
+
+    .remarks-history {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        width: calc(100% - 30px); /* Same width as project-details */
+        margin-left: auto; /* Centering */
+        margin-right: auto; /* Centering */
+    }
+
+    .team-members-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        width: calc(100% - 30px); /* Same width as project-details */
+    }
+
+    .team-member-icon {
+        display: flex;
+        align-items: center;
+        margin-right: 15px; /* Space between icons */
+    }
+
+    .team-member-icon img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .leader {
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    /* New styles for font size and spacing */
+    .project-details h2 {
+        font-size: 1.5em; /* Increase the size of the title */
+        margin-bottom: 10px; /* Space below the title */
+    }
+
+    .project-details p {
+        font-size: 1.1em; /* Slightly larger font for paragraphs */
+        margin: 5px 0; /* Space above and below each paragraph */
+    }
     </style>
 </head>
 <body>
 <div class="wrapper">
     <div class="sidebar">
-    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+        <div class="circle" onclick="document.querySelector('.file-upload').click()">
             <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
             <div class="p-image">
                 <i class="fa fa-camera upload-button"></i>
@@ -111,9 +208,9 @@ if (isset($_GET['file'])) {
                 </form>
             </div>
         </div><br>
-        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2> <!-- Display email -->
-        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p> <!-- Display role -->
-                <ul>
+        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2>
+        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p>
+        <ul>
             <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
@@ -129,10 +226,9 @@ if (isset($_GET['file'])) {
         </ul>
     </div>
 
-
     <div class="main_header">
         <div class="header">
-            <h1>PROJECT MANAGEMENT</h1>
+            <h1>PROJECT PROGRESS</h1>
             <div class="header_icons">
                 <div class="search">
                     <input type="text" placeholder="Search..." />
@@ -145,82 +241,98 @@ if (isset($_GET['file'])) {
         <hr>
     </div>
 </div>
-<div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Project Title</th>
-                <th>Team Name</th>
-                <th>Status</th>
-                <th>Project Leader</th>
-                <th>Members</th>
-                <th>Description</th>
-                <th>PPT Link</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['title']); ?></td>
-                        <td><?php echo htmlspecialchars($row['team_name']); ?></td>
-                        <td><?php echo htmlspecialchars($row['status']); ?></td>
-                        <td><?php echo htmlspecialchars($row['leader']); ?></td>
-                        <td><?php echo htmlspecialchars($row['members']); ?></td>
-                        <td>
+
+<div class="flex-container">
+    <?php if ($result->num_rows > 0): ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
+            <div class="project-details">
+                <div class="top-section">
+                    <div class="left-top">
+                        <h2><?php echo htmlspecialchars($row['title']); ?></h2>
+                        <p><strong>Team Name:</strong> <?php echo htmlspecialchars($row['team_name']); ?></p>
+                        <p><strong>Status:</strong> <?php echo htmlspecialchars($row['status']); ?></p>
+                        <p><strong>Shared Date:</strong> <?php echo htmlspecialchars($row['created_at']); ?></p>
+                    </div>
+                    <div class="right-top">
+                        <p><strong>Abstract:</strong> <?php echo nl2br(htmlspecialchars($row['abstract'])); ?></p>
+                    </div>
+                </div>
+
+<div class="bottom-section">
+    <div class="left-bottom">
+        <div class="team-members-container">
+            <?php
+            // Assuming you have a function to get team members by team name
+            $members = explode(',', $row['members']); // Assuming members are stored as a comma-separated string
+            $team_leader = $row['team_leader']; // Assuming you have the team leader's name from the database
+            
+            // Counter to track the display of the leader vs. members
+            $isLeaderDisplayed = false;
+            
+            // Loop through the members and display them
+            foreach ($members as $member) {
+                echo '<div class="team-member-icon">';
+                echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Member Image">'; // Placeholder for member's image
+                echo '<span>' . htmlspecialchars(trim($member)) . '</span>';
+                echo '</div>';
+            }
+            
+            // Display the team leader
+            echo '<div class="team-member-icon">';
+            echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Leader Image">'; // Placeholder for leader's image
+            echo '<span>' . htmlspecialchars(trim($team_leader)) . ' (Leader)</span>'; // Display leader with indication
+            echo '</div>';
+            ?>
+        </div>
+    </div>
+                <div class="bottom-section">
+                    <div class="left-bottom">
+                        <form method="POST" action="">
+                            <input type="hidden" name="project_id" value="<?php echo $row['id']; ?>">
+                            <input type="text" name="email" placeholder="Enter staff email" required>
+                            <textarea name="remark" class="textarea-style" placeholder="Add your remark" required></textarea>
+                            <button type="submit" class="remarks-button">Add Remark</button>
+                        </form>
+                    </div>
+                    <div class="right-bottom">
+                        <button class="remarks-button" onclick="toggleRemarks(<?php echo $row['id']; ?>)">View Remarks</button>
+                        <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
                             <?php
-                            // Replace newline characters with a space for a continuous paragraph
-                            $abstract = $row['abstract'] ? str_replace(array("\r", "\n"), ' ', $row['abstract']) : 'N/A';
-                            echo nl2br(htmlspecialchars($abstract)); // Use nl2br for any remaining HTML line breaks
+                            // Fetch remarks related to the current project
+                            $remarksQuery = $conn->prepare("SELECT content FROM remarks WHERE project_id = ?");
+                            $remarksQuery->bind_param("i", $row['id']);
+                            $remarksQuery->execute();
+                            $remarksResult = $remarksQuery->get_result();
+                            
+                            if ($remarksResult->num_rows > 0) {
+                                while ($remarkRow = $remarksResult->fetch_assoc()) {
+                                    echo "<p>" . htmlspecialchars($remarkRow['content']) . "</p>";
+                                }
+                            } else {
+                                echo "<p>No remarks yet.</p>";
+                            }
                             ?>
-                        </td>
-                        <td>
-                            <?php if ($row['ppt_path']): ?>
-                                <a href="view_file.php?file=<?php echo urlencode(basename($row['ppt_path'])); ?>" target="_blank">View File</a>
-                            <?php else: ?>
-                                N/A
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <select class='action-dropdown' onchange='handleAction(this, "<?php echo htmlspecialchars($row['mentor_id']); ?>")'>
-                                <option value='' selected>Action</option>
-                                <option value='view'>View</option>
-                                <option value='delete'>Delete</option>
-                            </select>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="8">No submissions found.</td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <p>No projects found.</p>
+    <?php endif; ?>
 </div>
 
-    <script>
-        function handleAction(select, mentorId) {
-            const action = select.value;
-            if (action === 'view') {
-                // Implement the view functionality (e.g., navigate to the view page)
-                window.location.href = 'view_project.php?id=' + mentorId; // Replace with your view page URL
-            } else if (action === 'delete') {
-                if (confirm('Are you sure you want to delete this submission?')) {
-                    // Redirect to delete page
-                    window.location.href = 'delete_project.php?id=' + mentorId; // Replace with your delete page URL
-                } else {
-                    // Reset the dropdown if cancelled
-                    select.selectedIndex = 0;
-                }
-            }
-        }
-    </script>
+<script>
+    function toggleRemarks(id) {
+        const remarksDiv = document.getElementById('remarks-' + id);
+        remarksDiv.style.display = (remarksDiv.style.display === "none" || remarksDiv.style.display === "") ? "block" : "none";
+    }
+</script>
 
-    <?php
-    // Close the database connection
-    $conn->close();
-    ?>
 </body>
 </html>
+
+<?php
+// Close the database connection after all operations are completed
+$conn->close();
+?>

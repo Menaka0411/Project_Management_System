@@ -124,7 +124,7 @@ CREATE TABLE projects (
     mentor_id INT NOT NULL,
     status ENUM('Pending', 'Approved', 'Rejected') NOT NULL,
     abstract MEDIUMTEXT NOT NULL,
-    ppt_path VARCHAR(255),  -- Assuming this is optional
+    ppt_path VARCHAR(255),  
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (mentor_id) REFERENCES staff(id) ON DELETE CASCADE
 );
@@ -197,4 +197,24 @@ CREATE TABLE allocated_mentors (
     mentor_name VARCHAR(255) NOT NULL,   -- Allocated mentor's name
     action ENUM('allocated', 'not allocated') DEFAULT 'not allocated',  -- Allocation action
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE remarks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_email VARCHAR(255) NOT NULL,
+    team_name VARCHAR(100) NOT NULL,
+    remark TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_email) REFERENCES staff(email) ON DELETE CASCADE
+);
+
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_email VARCHAR(255) NOT NULL,
+    student_email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    team_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_email) REFERENCES staff(email) ON DELETE CASCADE,
+    FOREIGN KEY (student_email) REFERENCES students(email) ON DELETE CASCADE
 );

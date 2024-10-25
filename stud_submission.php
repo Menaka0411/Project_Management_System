@@ -11,7 +11,7 @@ $messages = [];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PMS</title>
+    <title>PMS Student Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="mentors.css">
