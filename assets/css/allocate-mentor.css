@@ -41,7 +41,7 @@ button:hover {
 background-color: #0056b3;
 }
 table {
-width: 100%;
+width: 85%;
 border-collapse: collapse;
 margin-bottom: 20px;
 }
@@ -74,12 +74,13 @@ align-items: center;
 justify-content: space-between;
 }
 #allocate{
-margin-left: 20%;
+    width: 90%;
+margin-left: 18%;
 margin-top: 10%;
 }
 button {
 padding: 8px 12px;
-background-color: #007bff; /* Blue background */
+background-color: #4b4276; 
 color: white; /* White text */
 border: none; /* No border */
 cursor: pointer; /* Pointer cursor on hover */

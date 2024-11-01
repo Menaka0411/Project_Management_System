@@ -163,7 +163,7 @@ $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/8
 <section class="main-content">
     <section id="calendar">
         
-       <a href="events.html">add events</a>
+       <!-- <a href="events.html">add events</a> -->
     </section>
 </section>
 

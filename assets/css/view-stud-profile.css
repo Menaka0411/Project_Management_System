@@ -1,14 +1,22 @@
+.main-content-wrapper {
+    display: flex;
+    justify-content: center; /* Center the content */
+    background-color: white; /* Background color for the main content */
+    padding: 20px; /* Optional padding around the content */
+}
+
 .main-content {
+    margin-right: 5%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    margin-left: 13%;
-    margin-right: 5px;
+    width: 100%; /* Make sure it takes full width of the wrapper */
+    max-width: 1200px; /* Set a max width for the main content area */
 }
 
 .left-column, .right-column {
     margin-top: 15px;
-    width: 48%;
+    width: 48%; /* Keep the width of the columns */
 }
 
 .left-column {
@@ -81,7 +89,8 @@ button:hover {
 .back-arrow-container {
     position: fixed;
     margin-top: -1%;
-    margin-bottom:5%; 
+    margin-bottom:5%;
+    margin-left:-5%; 
     text-align: left; 
     z-index: 1;
 }

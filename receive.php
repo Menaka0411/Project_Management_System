@@ -2,8 +2,12 @@
 session_start();
 include 'db_connection.php';
 include 'includes/profile_pic.php';
+if ($_SESSION['role'] !== 'Staff') {
+    $_SESSION['role'] = 'Staff'; 
+}
+
 $username = $_SESSION['username'] ?? 'Vaishali'; 
-$role = $_SESSION['role'] ?? 'N/A';
+$role = $_SESSION['role'];
 $mentor_data = $_SESSION['mentor_data'] ?? null;
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image

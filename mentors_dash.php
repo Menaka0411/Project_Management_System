@@ -6,8 +6,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] == 'staff') {
     exit();
 }
 
+if ($_SESSION['role'] !== 'Staff') {
+    $_SESSION['role'] = 'Staff'; // Reset role to 'Staff' for this session
+}
+
 $username = $_SESSION['username'] ?? 'Vaishali'; 
-$role = $_SESSION['role'] ?? 'N/A';
+$role = $_SESSION['role']; // Now this will always reflect the session role
+
 $mentor_data = $_SESSION['mentor_data'] ?? null;
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image

@@ -2,8 +2,13 @@
 session_start();
 include 'db_connection.php';
 include 'includes/profile_pic.php';
+if ($_SESSION['role'] !== 'Staff') {
+    $_SESSION['role'] = 'Staff'; 
+}
+
 $username = $_SESSION['username'] ?? 'Vaishali'; 
-$role = $_SESSION['role'] ?? 'N/A';
+$role = $_SESSION['role']; 
+
 $mentor_data = $_SESSION['mentor_data'] ?? null;
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
@@ -36,9 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Execute the statement for student details
         if ($stmt->execute()) {
-            // Redirect to the student profile page after successful insertion
-            header("Location: stud_profiles.php?roll_number=" . urlencode($roll_number));
-            exit(); // Ensure no further code is executed after redirection
+            // Set success message in the session
+            $_SESSION['success_message'] = "Student added successfully.";
+            
+            // Redirect to the same page (add_stud.php)
+            header("Location: add_stud.php");
+            exit();
         } else {
             echo "<p style='color: red;'>Error: " . $stmt->error . "</p>";
         }

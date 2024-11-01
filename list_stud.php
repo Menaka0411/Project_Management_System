@@ -3,8 +3,13 @@ session_start();
  include 'db_connection.php';
  include 'includes/profile_pic.php';
 
- $username = $_SESSION['username'] ?? 'Vaishali'; 
- $role = $_SESSION['role'] ?? 'N/A';
+ if ($_SESSION['role'] !== 'Staff') {
+    $_SESSION['role'] = 'Staff'; 
+}
+
+$username = $_SESSION['username'] ?? 'Vaishali'; 
+$role = $_SESSION['role']; 
+
  $mentor_data = $_SESSION['mentor_data'] ?? null;
  $dashboard_data = $_SESSION['dashboard_data'] ?? null;
  $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
@@ -177,7 +182,7 @@ function handleAction(select, rollNumber) {
 
     if (action === 'view') {
         // Redirect to the student profile page with roll number as a query parameter
-        window.location.href = `view_stud_profiles.php?roll_number=${encodeURIComponent(rollNumber)}`;
+        window.location.href = `view_stud.php?roll_number=${encodeURIComponent(rollNumber)}`;
     } else if (action === 'delete') {
         // Confirm deletion
         if (confirm('Are you sure you want to delete this student? This action cannot be undone.')) {

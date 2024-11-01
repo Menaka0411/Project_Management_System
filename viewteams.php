@@ -1,21 +1,43 @@
 <?php
 session_start();
-include 'db_connection.php';
+include 'db_connection.php'; // Ensure your database connection is established
 include 'includes/profile_pic.php';
 
- $username = $_SESSION['username'] ?? 'Vaishali'; 
- $role = $_SESSION['role'] ?? 'N/A';
- $mentor_data = $_SESSION['mentor_data'] ?? null;
- $dashboard_data = $_SESSION['dashboard_data'] ?? null;
- $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
- 
- ?>
+// Ensure that the role is set to 'Staff'
+if ($_SESSION['role'] !== 'Staff') {
+    $_SESSION['role'] = 'Staff'; 
+}
+
+$username = $_SESSION['username'] ?? 'Vaishali'; 
+$role = $_SESSION['role'];
+$mentor_data = $_SESSION['mentor_data'] ?? null;
+$dashboard_data = $_SESSION['dashboard_data'] ?? null;
+$profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
+
+// Fetch teams and members from database
+$teams = [];
+$sql = "SELECT t.id AS team_id, t.team_name, t.department, t.year, GROUP_CONCAT(tm.member_name SEPARATOR ', ') AS members
+        FROM teams t
+        LEFT JOIN team_members tm ON t.id = tm.team_id
+        GROUP BY t.id";
+
+
+$result = $conn->query($sql); // Execute the query
+
+if ($result->num_rows > 0) {
+    // Fetch all teams
+    while ($row = $result->fetch_assoc()) {
+        $teams[] = $row; // Store the results in an array
+    }
+} else {
+    echo "No teams found";
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <title>PMS Mentor Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -28,11 +50,10 @@ include 'includes/profile_pic.php';
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
 </head>
-
 <body>
 <div class="wrapper">
     <div class="sidebar">
-    <div class="circle" onclick="document.querySelector('.file-upload').click()">
+        <div class="circle" onclick="document.querySelector('.file-upload').click()">
             <img class="profile-pic" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Picture">
             <div class="p-image">
                 <i class="fa fa-camera upload-button"></i>
@@ -41,9 +62,9 @@ include 'includes/profile_pic.php';
                 </form>
             </div>
         </div><br>
-        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2> <!-- Display email -->
-        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p> <!-- Display role -->
-                <ul>
+        <h2 class="profile-email"><?php echo htmlspecialchars($username); ?></h2>
+        <p class="profile-role" style="text-align: center;"><?php echo htmlspecialchars($role); ?></p>
+        <ul>
             <li><a href="mentors_dash.php"><i class="fas fa-home"></i>Home</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-btn"><i class="fas fa-user"></i> Students</a>
@@ -76,120 +97,68 @@ include 'includes/profile_pic.php';
     <div class="main-content">
 
         <!-- Filter and search section -->
-        <div class="filter-options">
-            <select id="departmentFilter" onchange="filterTeams()">
-                <option value="">All Departments</option>
-                <option value="CS">Computer Science</option>
-                <option value="ME">Mechanical Engineering</option>
-            </select>
-            <input type="text" id="teamSearch" placeholder="Search teams..." oninput="filterTeams()">
-        </div>
+       <!-- Filter and search section -->
+<div class="filter-options">
+    <input type="text" id="teamSearch" placeholder="Search teams..." oninput="filterTeams()">
+</div>
+
 
         <!-- Team cards section -->
         <section class="section-team">
-            <div class="team-card" data-team-id="team12"> 
-                <h3>Team Binders</h3>
-                <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 1</p>
-                <p><strong>Semester:</strong> 1</p>
-                <p><strong>Team Members:</strong> Menaka M,Vaishali U</p>
-                <div class="action-buttons">
+            <?php foreach ($teams as $team): ?>
+            <div class="team-card" data-team-id="<?php echo htmlspecialchars($team['team_id']); ?>"> 
+                <h3><?php echo htmlspecialchars($team['team_name']); ?></h3>
+                <p><strong>Department:</strong> <?php echo htmlspecialchars($team['department']); ?></p>
+                <p><strong>Year:</strong> <?php echo htmlspecialchars($team['year']); ?></p>
+                <p><strong>Team Members:</strong> <br><br><?php echo htmlspecialchars($team['members']); ?></p>
+                <!-- <div class="action-buttons">
                     <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
                     <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
+                </div> -->
             </div>
-            <div class="team-card" data-team-id="team123"> 
-                <h3>Team Peaky</h3>
-                <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 2</p>
-                <p><strong>Semester:</strong> 3</p>
-                <p><strong>Team Members:</strong> Gv D,HAri P,Gayu S</p>
-                <div class="action-buttons" >
-                    <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
-                    <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
-            </div>
-            <div class="team-card" data-team-id="team18"> 
-                <h3>Team Ghost</h3>
-                <p><strong>Department:</strong> Computer Science</p>
-                <p><strong>Year:</strong> 3</p>
-                <p><strong>Semester:</strong> 5</p>
-                <p><strong>Team Members:</strong> Pavi T,Aarthi S,Latika M,Loki M</p>
-                <div class="action-buttons">
-                    <button class="approve" onclick="updateProjectStatus(this, 'approve')">Approve</button>
-                    <button class="disapprove" onclick="updateProjectStatus(this, 'disapprove')">Disapprove</button>
-                </div>
-            </div>
-        
+            <?php endforeach; ?>
         </section>
     </div>
 
     <script>
-        // Filtering logic
-        function filterTeams() {
-            const searchInput = document.getElementById("teamSearch").value.toLowerCase();
-            const departmentFilter = document.getElementById("departmentFilter").value;
-            const teamCards = document.querySelectorAll(".team-card");
+    // Filtering logic
+    function filterTeams() {
+        const searchInput = document.getElementById("teamSearch").value.toLowerCase();
+        const teamCards = document.querySelectorAll(".team-card");
 
-            teamCards.forEach(card => {
-                const teamName = card.querySelector("h3").textContent.toLowerCase();
-                const department = card.querySelector("p").textContent.toLowerCase();
+        teamCards.forEach(card => {
+            const teamName = card.querySelector("h3").textContent.toLowerCase();
 
-                const matchesSearch = teamName.includes(searchInput);
-                const matchesDepartment = departmentFilter === "" || department.includes(departmentFilter.toLowerCase());
+            // Check if the team name matches the search input
+            const matchesSearch = teamName.includes(searchInput);
 
-                if (matchesSearch && matchesDepartment) {
-                    card.style.display = ""; // Show the card
-                } else {
-                    card.style.display = "none"; // Hide the card
-                }
-            });
+            if (matchesSearch) {
+                card.style.display = ""; // Show the card
+            } else {
+                card.style.display = "none"; // Hide the card
+            }
+        });
+    }
+
+        function updateProjectStatus(buttonElement, action) {
+            // Get the parent team-card element
+            const teamCard = buttonElement.closest('.team-card');
+
+            // Extract data attributes
+            const teamId = teamCard.getAttribute('data-team-id');
+            const teamName = teamCard.querySelector("h3").textContent;
+            const department = teamCard.querySelector("p").textContent.match(/Department:\s*(.*)/)[1]; 
+            const year = teamCard.querySelector("p").textContent.match(/Year:\s*(\d+)/)[1]; 
+            const semester = teamCard.querySelector("p").textContent.match(/Semester:\s*(\d+)/)[1]; 
+            const teamMembers = teamCard.querySelector("p").textContent.match(/Team Members:\s*(.*)/)[1];
+
+            // Perform AJAX call to update project status in the database
+            // Example AJAX call (implement this based on your backend API)
+            // $.post('your_api_endpoint', { teamId, action, ... }, function(response) {
+            //     // Handle response
+            // });
+            console.log(`Team ID: ${teamId}, Action: ${action}`); // Log for testing
         }
-
-        
-        function updateProjectStatus(buttonElement, action)
-         {
-                // Get the parent team-card element
-                const teamCard = buttonElement.closest('.team-card');
-
-                // Extract data attributes
-                const teamId = teamCard.getAttribute('data-team-id'); // Add this attribute to your team cards
-                const teamName = teamCard.querySelector("h3").textContent;
-                const department = teamCard.querySelector("p").textContent.match(/Department:\s*(.*)/)[1]; // Adjusted for correct extraction
-                const year = teamCard.querySelector("p").textContent.match(/Year:\s*(\d+)/)[1]; // Adjusted for correct extraction
-                const semester = teamCard.querySelector("p").textContent.match(/Semester:\s*(\d+)/)[1]; // Adjusted for correct extraction
-                const teamMembers = teamCard.querySelector("p").textContent.match(/Team Members:\s*(.*)/)[1]; // Adjusted for correct extraction
-
-                // Prepare the data to send
-                const postData = `team_id=${encodeURIComponent(teamId)}&` +
-                                `team_name=${encodeURIComponent(teamName)}&` +
-                                `department=${encodeURIComponent(department)}&` +
-                                `year=${encodeURIComponent(year)}&` +
-                                `semester=${encodeURIComponent(semester)}&` +
-                                `team_members=${encodeURIComponent(teamMembers)}&` +
-                                `action=${encodeURIComponent(action)}`;
-
-                fetch('update_approval.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: postData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Status updated successfully!');
-                    } else {
-                        alert('Error updating status: ' + data.message);
-                    }
-                })
-            .catch(error => console.error('Error:', error));
-        }
-
-
-
     </script>
 </body>
-
 </html>

@@ -3,8 +3,12 @@ session_start();
 include 'db_connection.php';
 include 'includes/profile_pic.php';
 
+if ($_SESSION['role'] !== 'Staff') {
+    $_SESSION['role'] = 'Staff'; 
+}
+
 $username = $_SESSION['username'] ?? 'Vaishali'; 
-$role = $_SESSION['role'] ?? 'N/A';
+$role = $_SESSION['role'];
 $dashboard_data = $_SESSION['dashboard_data'] ?? null;
 $profile_image = $_SESSION['profile_image'] ?? 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'; // Default image
 
@@ -56,6 +60,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
+// Retrieve remarks for the current project
+$remarksQuery = $conn->prepare("SELECT staff_email, remark, created_at FROM remarks WHERE project_id = ?");
+$remarksQuery->bind_param("i", $row['id']);
+$remarksQuery->execute();
+$remarksResult = $remarksQuery->get_result();
+
+if ($remarksResult->num_rows > 0) {
+    while ($remarkRow = $remarksResult->fetch_assoc()) {
+        echo '<div class="remark-item">';
+        echo '<strong>' . htmlspecialchars($remarkRow['staff_email']) . ':</strong> ';
+        echo '<span>' . nl2br(htmlspecialchars($remarkRow['remark'])) . '</span>';
+        echo '<em> (' . htmlspecialchars($remarkRow['created_at']) . ')</em>';
+        echo '</div>';
+    }
+} else {
+}
+
+$remarksQuery->close();
 
 ?>
 
@@ -314,9 +336,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
         <?php
+        // (The remarks retrieval code goes here)
         ?>
     </div>
-</div> 
+</div>
 
 <?php endwhile; ?>
 <?php else: ?>

@@ -272,9 +272,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p><strong>Team Name:</strong> <?php echo htmlspecialchars($row['team_name']); ?></p>
                         <p><strong>Status:</strong> <?php echo htmlspecialchars($row['status']); ?></p>
                         <p><strong>Shared Date:</strong> <?php echo htmlspecialchars($row['created_at']); ?></p>
+                        <p><strong>Uploads:</strong> 
+    <?php 
+    if (!empty($row['ppt_path'])): 
+        $file_path = htmlspecialchars($row['ppt_path']);
+        $file_extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        
+        // Set MIME type based on the file extension
+        $mime_types = [
+            'pdf' => 'application/pdf',
+            'ppt' => 'application/vnd.ms-powerpoint',
+            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm'
+        ];
+
+        $mime_type = $mime_types[$file_extension] ?? 'application/octet-stream'; // Default if unknown
+
+        // Generate the HTML for viewable file
+        echo "<a href=\"$file_path\" target=\"_blank\">View Project File</a>";
+    else: 
+        echo "No file uploaded.";
+    endif;
+    ?>
+</p>
+
                     </div>
                     <div class="right-top">
                         <p><strong>Abstract:</strong> <?php echo nl2br(htmlspecialchars($row['abstract'])); ?></p>
+
                     </div>
                 </div>
 
@@ -304,6 +334,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Remarks Section -->
 <div class="remarks-section">
     <button class="remarks-button" onclick="toggleRemarks(<?php echo $row['id']; ?>)">Add/View Message</button>
+    
     <div id="remarks-form-<?php echo $row['id']; ?>" class="remarks-form" style="display:none;">
         <form method="POST" action="">
             <input type="hidden" name="project_id" value="<?php echo $row['id']; ?>">
@@ -312,11 +343,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="remarks-button">Submit Remark</button>
         </form>
     </div>
+
     <div id="remarks-<?php echo $row['id']; ?>" class="remarks-history" style="display:none;">
         <?php
+        // Fetch and display remarks from the database
+        $project_id = $row['id'];
+        $remarkQuery = $conn->prepare("SELECT staff_email, remark FROM remarks WHERE project_id = ?");
+        $remarkQuery->bind_param("i", $project_id);
+        $remarkQuery->execute();
+        $remarksResult = $remarkQuery->get_result();
+
+        if ($remarksResult->num_rows > 0) {
+            while ($remarkRow = $remarksResult->fetch_assoc()) {
+                echo "<p><strong>" . htmlspecialchars($remarkRow['staff_email']) . ":</strong> " . htmlspecialchars($remarkRow['remark']) . "</p>";
+            }
+        } else {
+            echo "<p>No remarks yet.</p>";
+        }
+        $remarkQuery->close();
         ?>
     </div>
-</div> 
+</div>
 
 <?php endwhile; ?>
 <?php else: ?>
@@ -326,21 +373,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div> 
 
 <script>
+    
 function toggleRemarks(projectId) {
     const remarksForm = document.getElementById(`remarks-form-${projectId}`);
     const remarksHistory = document.getElementById(`remarks-${projectId}`);
-
-    // Toggle the display of the remarks form
-    if (remarksForm.style.display === 'none') {
-        remarksForm.style.display = 'block';
-        remarksHistory.style.display = 'none'; // Hide the history when form is shown
+    
+    // Toggle visibility of the remarks form and history
+    if (remarksForm.style.display === "none") {
+        remarksForm.style.display = "block";
+        remarksHistory.style.display = "none"; // Hide remarks history when form is visible
     } else {
-        remarksForm.style.display = 'none';
-        remarksHistory.style.display = 'block'; // Show history when form is hidden
+        remarksForm.style.display = "none";
+        remarksHistory.style.display = "block"; // Show remarks history when form is hidden
     }
-    // Toggle remarks history display
-    remarksHistory.style.display = remarksHistory.style.display === "none" ? "block" : "none";
 }
+
+
 
 function toggleRemarks(projectId) {
     const remarksForm = document.getElementById(`remarks-form-${projectId}`);
